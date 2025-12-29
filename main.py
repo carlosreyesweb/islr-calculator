@@ -3,8 +3,10 @@ Venezuelan Income Tax (ISLR) Calculator
 Calculates income tax based on Venezuelan tax brackets using Unidad Tributaria (UT)
 """
 
+import csv
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from rich import box
@@ -77,18 +79,62 @@ except ValueError:
     )
     sys.exit(1)
 
-# Venezuelan Tax Brackets (ISLR)
-# Based on annual income in UT
-TAX_BRACKETS = [
-    {"min_ut": 0, "max_ut": 1000, "rate": 0.06, "subtract_ut": 0},
-    {"min_ut": 1000, "max_ut": 1500, "rate": 0.09, "subtract_ut": 30},
-    {"min_ut": 1500, "max_ut": 2000, "rate": 0.12, "subtract_ut": 75},
-    {"min_ut": 2000, "max_ut": 2500, "rate": 0.16, "subtract_ut": 155},
-    {"min_ut": 2500, "max_ut": 3000, "rate": 0.20, "subtract_ut": 255},
-    {"min_ut": 3000, "max_ut": 4000, "rate": 0.24, "subtract_ut": 375},
-    {"min_ut": 4000, "max_ut": 6000, "rate": 0.29, "subtract_ut": 575},
-    {"min_ut": 6000, "max_ut": float("inf"), "rate": 0.34, "subtract_ut": 875},
-]
+
+def load_tax_brackets_from_csv(filepath: str = "tax_brackets.csv") -> list[dict]:
+    """
+    Load tax brackets from a CSV file
+
+    Args:
+        filepath: Path to the CSV file containing tax brackets
+
+    Returns:
+        List of dictionaries containing bracket information
+    """
+    brackets = []
+    csv_path = Path(__file__).parent / filepath
+
+    try:
+        with open(csv_path, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                bracket = {
+                    "min_ut": float(row["min_ut"]),
+                    "max_ut": float("inf")
+                    if row["max_ut"].lower() == "inf"
+                    else float(row["max_ut"]),
+                    "rate": float(row["rate"]),
+                    "subtract_ut": float(row["subtract_ut"]),
+                }
+                brackets.append(bracket)
+
+        if not brackets:
+            console.print(
+                f"[bold red]Error: No tax brackets found in {filepath}[/bold red]"
+            )
+            sys.exit(1)
+
+        return brackets
+
+    except FileNotFoundError:
+        console.print(
+            f"[bold red]Error: Tax brackets file '{filepath}' not found.[/bold red]"
+        )
+        console.print(
+            "[yellow]Please ensure the CSV file exists in the project directory.[/yellow]"
+        )
+        sys.exit(1)
+    except (KeyError, ValueError) as e:
+        console.print(
+            f"[bold red]Error: Invalid format in tax brackets CSV: {e}[/bold red]"
+        )
+        console.print(
+            "[yellow]Expected columns: min_ut, max_ut, rate, subtract_ut[/yellow]"
+        )
+        sys.exit(1)
+
+
+# Load Venezuelan Tax Brackets from CSV
+TAX_BRACKETS = load_tax_brackets_from_csv()
 
 
 def calculate_tax(

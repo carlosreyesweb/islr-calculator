@@ -27,7 +27,28 @@ USD_TO_VES=295                   # Exchange rate from Central Bank of Venezuela
 STANDARD_DEDUCTION_UT=775        # Standard deduction
 ```
 
-3. Install dependencies:
+3. Configure tax brackets (optional):
+
+The tax brackets are loaded from `tax_brackets.csv`. You can modify this file to update the brackets without changing the code:
+
+```csv
+min_ut,max_ut,rate,subtract_ut
+0,1000,0.06,0
+1000,1500,0.09,30
+1500,2000,0.12,75
+2000,2500,0.16,155
+2500,3000,0.20,255
+3000,4000,0.24,375
+4000,6000,0.29,575
+6000,inf,0.34,875
+```
+
+- `min_ut`: Minimum income in UT for this bracket
+- `max_ut`: Maximum income in UT for this bracket (use `inf` for unlimited)
+- `rate`: Tax rate as a decimal (e.g., 0.06 for 6%)
+- `subtract_ut`: Amount to subtract in UT when calculating tax
+
+4. Install dependencies:
 
 ```bash
 uv sync
