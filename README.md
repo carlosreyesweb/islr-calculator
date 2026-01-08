@@ -53,9 +53,11 @@ min_ut,max_ut,rate,subtract_ut
 4. Install dependencies:
 
 ```bash
-uv sync
+uv sync # creates environment and installs dependencies
 # or
-pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ## Usage
