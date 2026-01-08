@@ -1,0 +1,111 @@
+{
+  "app": {
+    "title": "🇻🇪 Calculadora de Impuesto sobre la Renta Venezolana (ISLR)"
+  },
+  "header": {
+    "ut_value": "Valor UT:",
+    "usd_rate": "Tasa USD:",
+    "standard_deduction": "Desgravamen Único:",
+    "taxpayer_credit": "Rebaja Contribuyente:",
+    "dependent_credit": "Rebaja por Dependiente:"
+  },
+  "menu": {
+    "prompt": "¿Qué te gustaría hacer?",
+    "calculate_tax": "💰 Calcular impuesto sobre la renta",
+    "view_brackets": "📊 Ver tramos impositivos",
+    "exit": "🚪 Salir"
+  },
+  "input": {
+    "dependents_prompt": "¿Cuántos dependientes directos tienes?:",
+    "currency_prompt": "Selecciona la moneda:",
+    "income_prompt": "Ingresa tu ingreso mensual en {currency}:",
+    "currency_ves": "🇻🇪 VES (Bolívares)",
+    "currency_usd": "💵 USD (Dólares)"
+  },
+  "errors": {
+    "negative_dependents": "❌ El número de dependientes no puede ser negativo. Por favor, intenta de nuevo.",
+    "invalid_number": "❌ Entrada inválida. Por favor, ingresa un número válido.",
+    "invalid_whole_number": "❌ Entrada inválida. Por favor, ingresa un número entero válido.",
+    "negative_income": "❌ El ingreso no puede ser negativo. Por favor, intenta de nuevo.",
+    "enter_valid_number": "Por favor, ingresa un número válido"
+  },
+  "results": {
+    "title": "💰 Resultados del Cálculo de Impuestos",
+    "annual_income_ves": "Ingreso Anual (VES):",
+    "annual_income_usd": "Ingreso Anual (USD):",
+    "income_ut": "Ingreso en UT:",
+    "standard_deduction": "Desgravamen Único:",
+    "taxable_income": "Ingreso Gravable:",
+    "marginal_rate": "Tasa Impositiva Marginal:",
+    "taxpayer_credit": "Rebaja Fiscal Contribuyente:",
+    "dependent_credits": "Rebajas Fiscales por Dependientes ({count}):",
+    "total_tax_ut": "Impuesto Total (UT):",
+    "total_tax_ves": "Impuesto Total (VES):",
+    "total_tax_usd": "Impuesto Total (USD):",
+    "effective_rate": "Tasa Impositiva Efectiva:",
+    "net_income_ves": "Ingreso Neto (VES):",
+    "net_income_usd": "Ingreso Neto (USD):"
+  },
+  "brackets": {
+    "title": "📊 Tramos Impositivos ISLR Venezuela",
+    "income_range_ut": "Rango de Ingreso (UT)",
+    "income_range_bs": "Rango de Ingreso (Bs.)",
+    "tax_rate": "Tasa Impositiva",
+    "subtract_ut": "Sustraendo (UT)"
+  },
+  "breakdown": {
+    "title": "🔢 Desglose del Cálculo",
+    "step": "Paso"
+  },
+  "messages": {
+    "goodbye": "✨ ¡Gracias por usar la Calculadora ISLR!",
+    "no_income_specified": "⚠️  No se especificó ingreso, no hay impuesto que calcular."
+  },
+  "prompts": {
+    "show_calculation_breakdown": "¿Mostrar desglose del cálculo?",
+    "calculate_another_income": "¿Calcular para otro ingreso?",
+    "return_to_main_menu": "¿Volver al menú principal?"
+  },
+  "calculation": {
+    "annual_income": "Ingreso Anual:",
+    "standard_deduction": "Desgravamen Único:",
+    "taxable": "gravable",
+    "tax_bracket": "Tramo Impositivo:",
+    "tax_calculation": "Cálculo de Impuesto:",
+    "no_taxable_income": "Sin ingreso gravable (después del desgravamen único)",
+    "contributor_credit": "Rebaja del Contribuyente",
+    "dependents": "Dependientes",
+    "apply_tax_credits": "Aplicar Rebajas Fiscales",
+    "final": "final",
+    "tax_credits_not_applicable": "Rebajas Fiscales (no aplicable, no hay impuesto adeudado):",
+    "convert_to_ves": "Convertir a VES:",
+    "effective_rate_calc": "Tasa Efectiva:"
+  },
+  "config_errors": {
+    "ut_value_not_set": "Error: La variable de entorno UT_VALUE no está configurada.",
+    "please_set_ut_value": "Por favor, configura UT_VALUE antes de ejecutar la calculadora.",
+    "example_ut_value": "Ejemplo: export UT_VALUE=43.0",
+    "ut_value_invalid": "Error: UT_VALUE '{value}' no es un número válido.",
+    "usd_rate_not_set": "Error: La variable de entorno USD_TO_VES no está configurada.",
+    "please_set_usd_rate": "Por favor, configura USD_TO_VES antes de ejecutar la calculadora.",
+    "example_usd_rate": "Ejemplo: export USD_TO_VES=50.0",
+    "usd_rate_invalid": "Error: USD_TO_VES '{value}' no es un número válido.",
+    "standard_deduction_not_set": "Error: La variable de entorno STANDARD_DEDUCTION_UT no está configurada.",
+    "please_set_standard_deduction": "Por favor, configura STANDARD_DEDUCTION_UT antes de ejecutar la calculadora.",
+    "example_standard_deduction": "Ejemplo: export STANDARD_DEDUCTION_UT=775",
+    "standard_deduction_invalid": "Error: STANDARD_DEDUCTION_UT '{value}' no es un número válido.",
+    "taxpayer_credit_not_set": "Error: La variable de entorno TAXPAYER_CREDIT_UT no está configurada.",
+    "please_set_taxpayer_credit": "Por favor, configura TAXPAYER_CREDIT_UT antes de ejecutar la calculadora.",
+    "example_taxpayer_credit": "Ejemplo: export TAXPAYER_CREDIT_UT=10",
+    "taxpayer_credit_invalid": "Error: TAXPAYER_CREDIT_UT '{value}' no es un número válido.",
+    "dependent_credit_not_set": "Error: La variable de entorno DEPENDENT_CREDIT_UT no está configurada.",
+    "please_set_dependent_credit": "Por favor, configura DEPENDENT_CREDIT_UT antes de ejecutar la calculadora.",
+    "example_dependent_credit": "Ejemplo: export DEPENDENT_CREDIT_UT=10",
+    "dependent_credit_invalid": "Error: DEPENDENT_CREDIT_UT '{value}' no es un número válido.",
+    "no_brackets_found": "Error: No se encontraron tramos impositivos en {filename}",
+    "brackets_file_not_found": "Error: El archivo de tramos impositivos '{filename}' no se encontró.",
+    "ensure_csv_exists": "Por favor, asegúrate de que el archivo CSV exista en el directorio del proyecto.",
+    "invalid_csv_format": "Error: Formato inválido en el CSV de tramos impositivos: {error}",
+    "expected_columns": "Columnas esperadas: min_ut, max_ut, rate, subtract_ut"
+  }
+}

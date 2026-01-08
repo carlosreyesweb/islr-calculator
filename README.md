@@ -22,10 +22,11 @@ cd islr-calculator
 2. Create a `.env` file with these values:
 
 ```bash
+ISLR_LANG=en                     # Language code (e.g., en, es)
 UT_VALUE=43.0                    # Current UT value in Bs.
 USD_TO_VES=295                   # Exchange rate from Central Bank of Venezuela
 STANDARD_DEDUCTION_UT=775        # Standard deduction (reduces taxable income)
-CONTRIBUTOR_CREDIT_UT=10         # Tax credit for the contributor (reduces tax)
+TAXPAYER_CREDIT_UT=10         # Tax credit for the taxpayer (reduces tax)
 DEPENDENT_CREDIT_UT=10           # Tax credit per dependent (reduces tax)
 ```
 

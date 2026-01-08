@@ -12,6 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from rich.console import Console
 
+from src.i18n import t
 from src.models import TaxBracket
 
 
@@ -22,7 +23,7 @@ class Config:
     ut_value: float
     usd_to_ves: float
     standard_deduction_ut: float
-    contributor_credit_ut: float
+    taxpayer_credit_ut: float
     dependent_credit_ut: float
     tax_brackets: list[TaxBracket]
 
@@ -34,40 +35,32 @@ def load_config(console: Console) -> Config:
     # Get UT_VALUE from environment variable
     ut_value_str = os.getenv("UT_VALUE")
     if ut_value_str is None:
-        console.print(
-            "[bold red]Error: UT_VALUE environment variable is not set.[/bold red]"
-        )
-        console.print(
-            "[yellow]Please set UT_VALUE before running the calculator.[/yellow]"
-        )
-        console.print("[dim]Example: export UT_VALUE=43.0[/dim]")
+        console.print(f"[bold red]{t('config_errors.ut_value_not_set')}[/bold red]")
+        console.print(f"[yellow]{t('config_errors.please_set_ut_value')}[/yellow]")
+        console.print(f"[dim]{t('config_errors.example_ut_value')}[/dim]")
         sys.exit(1)
 
     try:
         ut_value = float(ut_value_str)
     except ValueError:
         console.print(
-            f"[bold red]Error: UT_VALUE '{ut_value_str}' is not a valid number.[/bold red]"
+            f"[bold red]{t('config_errors.ut_value_invalid', value=ut_value_str)}[/bold red]"
         )
         sys.exit(1)
 
     # Get USD_TO_VES from environment variable
     usd_to_ves_str = os.getenv("USD_TO_VES")
     if usd_to_ves_str is None:
-        console.print(
-            "[bold red]Error: USD_TO_VES environment variable is not set.[/bold red]"
-        )
-        console.print(
-            "[yellow]Please set USD_TO_VES before running the calculator.[/yellow]"
-        )
-        console.print("[dim]Example: export USD_TO_VES=50.0[/dim]")
+        console.print(f"[bold red]{t('config_errors.usd_rate_not_set')}[/bold red]")
+        console.print(f"[yellow]{t('config_errors.please_set_usd_rate')}[/yellow]")
+        console.print(f"[dim]{t('config_errors.example_usd_rate')}[/dim]")
         sys.exit(1)
 
     try:
         usd_to_ves = float(usd_to_ves_str)
     except ValueError:
         console.print(
-            f"[bold red]Error: USD_TO_VES '{usd_to_ves_str}' is not a valid number.[/bold red]"
+            f"[bold red]{t('config_errors.usd_rate_invalid', value=usd_to_ves_str)}[/bold red]"
         )
         sys.exit(1)
 
@@ -75,39 +68,39 @@ def load_config(console: Console) -> Config:
     standard_deduction_ut_str = os.getenv("STANDARD_DEDUCTION_UT")
     if standard_deduction_ut_str is None:
         console.print(
-            "[bold red]Error: STANDARD_DEDUCTION_UT environment variable is not set.[/bold red]"
+            f"[bold red]{t('config_errors.standard_deduction_not_set')}[/bold red]"
         )
         console.print(
-            "[yellow]Please set STANDARD_DEDUCTION_UT before running the calculator.[/yellow]"
+            f"[yellow]{t('config_errors.please_set_standard_deduction')}[/yellow]"
         )
-        console.print("[dim]Example: export STANDARD_DEDUCTION_UT=775[/dim]")
+        console.print(f"[dim]{t('config_errors.example_standard_deduction')}[/dim]")
         sys.exit(1)
 
     try:
         standard_deduction_ut = float(standard_deduction_ut_str)
     except ValueError:
         console.print(
-            f"[bold red]Error: STANDARD_DEDUCTION_UT '{standard_deduction_ut_str}' is not a valid number.[/bold red]"
+            f"[bold red]{t('config_errors.standard_deduction_invalid', value=standard_deduction_ut_str)}[/bold red]"
         )
         sys.exit(1)
 
-    # Get CONTRIBUTOR_CREDIT_UT from environment variable
-    contributor_credit_ut_str = os.getenv("CONTRIBUTOR_CREDIT_UT")
-    if contributor_credit_ut_str is None:
+    # Get TAXPAYER_CREDIT_UT from environment variable
+    taxpayer_credit_ut_str = os.getenv("TAXPAYER_CREDIT_UT")
+    if taxpayer_credit_ut_str is None:
         console.print(
-            "[bold red]Error: CONTRIBUTOR_CREDIT_UT environment variable is not set.[/bold red]"
+            f"[bold red]{t('config_errors.taxpayer_credit_not_set')}[/bold red]"
         )
         console.print(
-            "[yellow]Please set CONTRIBUTOR_CREDIT_UT before running the calculator.[/yellow]"
+            f"[yellow]{t('config_errors.please_set_taxpayer_credit')}[/yellow]"
         )
-        console.print("[dim]Example: export CONTRIBUTOR_CREDIT_UT=10[/dim]")
+        console.print(f"[dim]{t('config_errors.example_taxpayer_credit')}[/dim]")
         sys.exit(1)
 
     try:
-        contributor_credit_ut = float(contributor_credit_ut_str)
+        taxpayer_credit_ut = float(taxpayer_credit_ut_str)
     except ValueError:
         console.print(
-            f"[bold red]Error: CONTRIBUTOR_CREDIT_UT '{contributor_credit_ut_str}' is not a valid number.[/bold red]"
+            f"[bold red]{t('config_errors.taxpayer_credit_invalid', value=taxpayer_credit_ut_str)}[/bold red]"
         )
         sys.exit(1)
 
@@ -115,19 +108,19 @@ def load_config(console: Console) -> Config:
     dependent_credit_ut_str = os.getenv("DEPENDENT_CREDIT_UT")
     if dependent_credit_ut_str is None:
         console.print(
-            "[bold red]Error: DEPENDENT_CREDIT_UT environment variable is not set.[/bold red]"
+            f"[bold red]{t('config_errors.dependent_credit_not_set')}[/bold red]"
         )
         console.print(
-            "[yellow]Please set DEPENDENT_CREDIT_UT before running the calculator.[/yellow]"
+            f"[yellow]{t('config_errors.please_set_dependent_credit')}[/yellow]"
         )
-        console.print("[dim]Example: export DEPENDENT_CREDIT_UT=10[/dim]")
+        console.print(f"[dim]{t('config_errors.example_dependent_credit')}[/dim]")
         sys.exit(1)
 
     try:
         dependent_credit_ut = float(dependent_credit_ut_str)
     except ValueError:
         console.print(
-            f"[bold red]Error: DEPENDENT_CREDIT_UT '{dependent_credit_ut_str}' is not a valid number.[/bold red]"
+            f"[bold red]{t('config_errors.dependent_credit_invalid', value=dependent_credit_ut_str)}[/bold red]"
         )
         sys.exit(1)
 
@@ -138,7 +131,7 @@ def load_config(console: Console) -> Config:
         ut_value=ut_value,
         usd_to_ves=usd_to_ves,
         standard_deduction_ut=standard_deduction_ut,
-        contributor_credit_ut=contributor_credit_ut,
+        taxpayer_credit_ut=taxpayer_credit_ut,
         dependent_credit_ut=dependent_credit_ut,
         tax_brackets=tax_brackets,
     )
@@ -177,7 +170,7 @@ def load_tax_brackets_from_csv(
 
         if not brackets:
             console.print(
-                f"[bold red]Error: No tax brackets found in {filename}[/bold red]"
+                f"[bold red]{t('config_errors.no_brackets_found', filename=filename)}[/bold red]"
             )
             sys.exit(1)
 
@@ -185,17 +178,13 @@ def load_tax_brackets_from_csv(
 
     except FileNotFoundError:
         console.print(
-            f"[bold red]Error: Tax brackets file '{filename}' not found.[/bold red]"
+            f"[bold red]{t('config_errors.brackets_file_not_found', filename=filename)}[/bold red]"
         )
-        console.print(
-            "[yellow]Please ensure the CSV file exists in the project directory.[/yellow]"
-        )
+        console.print(f"[yellow]{t('config_errors.ensure_csv_exists')}[/yellow]")
         sys.exit(1)
     except (KeyError, ValueError) as e:
         console.print(
-            f"[bold red]Error: Invalid format in tax brackets CSV: {e}[/bold red]"
+            f"[bold red]{t('config_errors.invalid_csv_format', error=e)}[/bold red]"
         )
-        console.print(
-            "[yellow]Expected columns: min_ut, max_ut, rate, subtract_ut[/yellow]"
-        )
+        console.print(f"[yellow]{t('config_errors.expected_columns')}[/yellow]")
         sys.exit(1)

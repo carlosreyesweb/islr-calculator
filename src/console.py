@@ -11,6 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from src.i18n import t
 from src.models import CalculationStep, Currency, TaxBracket, TaxCalculationResult
 
 
@@ -52,22 +53,24 @@ class ConsoleUI:
         ut_value: float,
         usd_to_ves: float,
         standard_deduction_ut: float,
-        contributor_credit_ut: float,
+        taxpayer_credit_ut: float,
         dependent_credit_ut: float,
     ):
         """Display the application header"""
-        title = Text("🇻🇪 Venezuelan Income Tax Calculator (ISLR)", style="bold blue")
+        title = Text(t("app.title"), style="bold blue")
 
         # Create a table for organized display
         info_table = Table(show_header=False, box=None, padding=(0, 2))
         info_table.add_column("Label", style="bold cyan")
         info_table.add_column("Value", style="bold white")
 
-        info_table.add_row("UT Value:", f"{ut_value} Bs.")
-        info_table.add_row("USD Rate:", f"{usd_to_ves} Bs.")
-        info_table.add_row("Standard Deduction:", f"{standard_deduction_ut} UT")
-        info_table.add_row("Contributor Credit:", f"{contributor_credit_ut} UT")
-        info_table.add_row("Dependent Credit:", f"{dependent_credit_ut} UT")
+        info_table.add_row(t("header.ut_value"), f"{ut_value} Bs.")
+        info_table.add_row(t("header.usd_rate"), f"{usd_to_ves} Bs.")
+        info_table.add_row(
+            t("header.standard_deduction"), f"{standard_deduction_ut} UT"
+        )
+        info_table.add_row(t("header.taxpayer_credit"), f"{taxpayer_credit_ut} UT")
+        info_table.add_row(t("header.dependent_credit"), f"{dependent_credit_ut} UT")
 
         self.console.print(
             Panel(
@@ -85,11 +88,11 @@ class ConsoleUI:
             User's menu choice as string
         """
         choice = questionary.select(
-            "What would you like to do?",
+            t("menu.prompt"),
             choices=[
-                Choice("💰 Calculate income tax", value="1"),
-                Choice("📊 View tax brackets", value="2"),
-                Choice("🚪 Exit", value="3"),
+                Choice(t("menu.calculate_tax"), value="1"),
+                Choice(t("menu.view_brackets"), value="2"),
+                Choice(t("menu.exit"), value="3"),
             ],
             style=self.qstyle,
         ).ask()
@@ -106,10 +109,10 @@ class ConsoleUI:
         while True:
             try:
                 dependents_str = questionary.text(
-                    "How many direct dependents do you have?:",
+                    t("input.dependents_prompt"),
                     validate=lambda text: text.isdigit()
                     or text == ""
-                    or "Please enter a valid number",
+                    or t("errors.enter_valid_number"),
                     style=self.qstyle,
                     default="0",
                 ).ask()
@@ -119,15 +122,11 @@ class ConsoleUI:
 
                 dependents = int(dependents_str)
                 if dependents < 0:
-                    self.console.print(
-                        "[red]❌ Number of dependents cannot be negative. Please try again.[/red]"
-                    )
+                    self.console.print(f"[red]{t('errors.negative_dependents')}[/red]")
                     continue
                 return dependents
             except ValueError:
-                self.console.print(
-                    "[red]❌ Invalid input. Please enter a valid whole number.[/red]"
-                )
+                self.console.print(f"[red]{t('errors.invalid_whole_number')}[/red]")
 
     def get_monthly_income(self) -> tuple[float, Currency]:
         """
@@ -138,10 +137,10 @@ class ConsoleUI:
         """
         # Ask for currency first
         currency = questionary.select(
-            "Select currency:",
+            t("input.currency_prompt"),
             choices=[
-                Choice("🇻🇪 VES (Bolívares)", value=Currency.VES),
-                Choice("💵 USD (US Dollars)", value=Currency.USD),
+                Choice(t("input.currency_ves"), value=Currency.VES),
+                Choice(t("input.currency_usd"), value=Currency.USD),
             ],
             style=self.qstyle,
         ).ask()
@@ -152,7 +151,7 @@ class ConsoleUI:
         while True:
             try:
                 income_str = questionary.text(
-                    f"Enter your monthly income in {currency}:",
+                    t("input.income_prompt", currency=currency),
                     validate=lambda text: text.replace(",", "")
                     .replace(" ", "")
                     .replace(".", "", 1)
@@ -163,7 +162,7 @@ class ConsoleUI:
                     .replace(".", "", 1)
                     .replace("-", "", 1)
                     == ""
-                    or "Please enter a valid number",
+                    or t("errors.enter_valid_number"),
                     style=self.qstyle,
                     default="",
                 ).ask()
@@ -173,24 +172,20 @@ class ConsoleUI:
 
                 income = float(income_str.replace(",", "").replace(" ", ""))
                 if income < 0:
-                    self.console.print(
-                        "[red]❌ Income cannot be negative. Please try again.[/red]"
-                    )
+                    self.console.print(f"[red]{t('errors.negative_income')}[/red]")
                     continue
                 return income, currency
             except ValueError:
-                self.console.print(
-                    "[red]❌ Invalid input. Please enter a valid number.[/red]"
-                )
+                self.console.print(f"[red]{t('errors.invalid_number')}[/red]")
 
     def display_tax_brackets(self, tax_brackets: list[TaxBracket], ut_value: float):
         """Display the tax brackets table"""
-        table = Table(title="📊 Venezuelan ISLR Tax Brackets", box=box.ROUNDED)
+        table = Table(title=t("brackets.title"), box=box.ROUNDED)
 
-        table.add_column("Income Range (UT)", style="cyan", justify="right")
-        table.add_column("Income Range (Bs.)", style="cyan", justify="right")
-        table.add_column("Tax Rate", style="magenta", justify="center")
-        table.add_column("Subtract (UT)", style="yellow", justify="right")
+        table.add_column(t("brackets.income_range_ut"), style="cyan", justify="right")
+        table.add_column(t("brackets.income_range_bs"), style="cyan", justify="right")
+        table.add_column(t("brackets.tax_rate"), style="magenta", justify="center")
+        table.add_column(t("brackets.subtract_ut"), style="yellow", justify="right")
 
         for bracket in tax_brackets:
             min_ves = f"{bracket.min_ut * ut_value:,.2f}"
@@ -218,49 +213,54 @@ class ConsoleUI:
         results_table.add_column("Value", style="bold white")
 
         results_table.add_row(
-            "Annual Income (VES):", f"{result.annual_income_ves:,.2f} Bs."
+            t("results.annual_income_ves"), f"{result.annual_income_ves:,.2f} Bs."
         )
         results_table.add_row(
-            "Annual Income (USD):", f"${result.annual_income_usd:,.2f}"
+            t("results.annual_income_usd"), f"${result.annual_income_usd:,.2f}"
         )
-        results_table.add_row("Income in UT:", f"{result.income_ut:,.2f} UT")
+        results_table.add_row(t("results.income_ut"), f"{result.income_ut:,.2f} UT")
         results_table.add_row(
-            "Standard Deduction:", f"{result.standard_deduction_ut:,.2f} UT"
+            t("results.standard_deduction"), f"{result.standard_deduction_ut:,.2f} UT"
         )
-        results_table.add_row("Taxable Income:", f"{result.taxable_income_ut:,.2f} UT")
-        results_table.add_row("Marginal Tax Rate:", f"{result.bracket_rate:.0f}%")
         results_table.add_row(
-            "Contributor Tax Credit:", f"{result.contributor_credit_ut:.2f} UT"
+            t("results.taxable_income"), f"{result.taxable_income_ut:,.2f} UT"
+        )
+        results_table.add_row(t("results.marginal_rate"), f"{result.bracket_rate:.0f}%")
+        results_table.add_row(
+            t("results.taxpayer_credit"), f"{result.taxpayer_credit_ut:.2f} UT"
         )
         if result.dependents > 0:
             results_table.add_row(
-                f"Dependent Tax Credits ({result.dependents}):",
+                t("results.dependent_credits", count=result.dependents),
                 f"{result.dependents_credit_ut:,.2f} UT",
             )
         results_table.add_row("", "")
         results_table.add_row(
-            "Total Tax (UT):", f"[bold yellow]{result.total_tax_ut:,.2f} UT[/]"
+            t("results.total_tax_ut"), f"[bold yellow]{result.total_tax_ut:,.2f} UT[/]"
         )
         results_table.add_row(
-            "Total Tax (VES):", f"[bold yellow]{result.total_tax_ves:,.2f} Bs.[/]"
+            t("results.total_tax_ves"),
+            f"[bold yellow]{result.total_tax_ves:,.2f} Bs.[/]",
         )
         results_table.add_row(
-            "Total Tax (USD):", f"[bold yellow]${result.total_tax_usd:,.2f}[/]"
+            t("results.total_tax_usd"), f"[bold yellow]${result.total_tax_usd:,.2f}[/]"
         )
         results_table.add_row("", "")
         results_table.add_row(
-            "Effective Tax Rate:", f"[bold magenta]{result.effective_rate:.2f}%[/]"
+            t("results.effective_rate"),
+            f"[bold magenta]{result.effective_rate:.2f}%[/]",
         )
         results_table.add_row(
-            "Net Income (VES):", f"[bold green]{result.net_income_ves:,.2f} Bs.[/]"
+            t("results.net_income_ves"),
+            f"[bold green]{result.net_income_ves:,.2f} Bs.[/]",
         )
         results_table.add_row(
-            "Net Income (USD):", f"[bold green]${result.net_income_usd:,.2f}[/]"
+            t("results.net_income_usd"), f"[bold green]${result.net_income_usd:,.2f}[/]"
         )
 
         panel = Panel(
             results_table,
-            title="💰 Tax Calculation Results",
+            title=t("results.title"),
             border_style="green",
             box=box.DOUBLE,
         )
@@ -275,7 +275,7 @@ class ConsoleUI:
             steps: List of CalculationStep objects from calculator
         """
         breakdown_table = Table(show_header=False, box=None, padding=(0, 1))
-        breakdown_table.add_column("Step", style="dim cyan", no_wrap=True)
+        breakdown_table.add_column(t("breakdown.step"), style="dim cyan", no_wrap=True)
         breakdown_table.add_column("Calculation", style="white")
         breakdown_table.add_column("Result", style="bold yellow", justify="right")
 
@@ -288,7 +288,7 @@ class ConsoleUI:
 
         panel = Panel(
             breakdown_table,
-            title="🔢 Calculation Breakdown",
+            title=t("breakdown.title"),
             border_style="cyan",
             box=box.ROUNDED,
         )
@@ -302,6 +302,4 @@ class ConsoleUI:
 
     def show_goodbye_message(self):
         """Display goodbye message"""
-        self.console.print(
-            "[bold green]✨ Thank you for using the ISLR Calculator![/bold green]"
-        )
+        self.console.print(f"[bold green]{t('messages.goodbye')}[/bold green]")

@@ -34,7 +34,7 @@ class TaxCalculationResult:
     standard_deduction_ut: float
     dependents: int
     dependents_credit_ut: float
-    contributor_credit_ut: float
+    taxpayer_credit_ut: float
     taxable_income_ut: float
     bracket_rate: float
     total_tax_ut: float

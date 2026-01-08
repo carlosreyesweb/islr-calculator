@@ -1,0 +1,111 @@
+{
+  "app": {
+    "title": "🇻🇪 Venezuelan Income Tax Calculator (ISLR)"
+  },
+  "header": {
+    "ut_value": "UT Value:",
+    "usd_rate": "USD Rate:",
+    "standard_deduction": "Standard Deduction:",
+    "taxpayer_credit": "Taxpayer Credit:",
+    "dependent_credit": "Dependent Credit:"
+  },
+  "menu": {
+    "prompt": "What would you like to do?",
+    "calculate_tax": "💰 Calculate income tax",
+    "view_brackets": "📊 View tax brackets",
+    "exit": "🚪 Exit"
+  },
+  "input": {
+    "dependents_prompt": "How many direct dependents do you have?:",
+    "currency_prompt": "Select currency:",
+    "income_prompt": "Enter your monthly income in {currency}:",
+    "currency_ves": "🇻🇪 VES (Bolívares)",
+    "currency_usd": "💵 USD (Dollars)"
+  },
+  "errors": {
+    "negative_dependents": "❌ Number of dependents cannot be negative. Please try again.",
+    "invalid_number": "❌ Invalid input. Please enter a valid number.",
+    "invalid_whole_number": "❌ Invalid input. Please enter a valid whole number.",
+    "negative_income": "❌ Income cannot be negative. Please try again.",
+    "enter_valid_number": "Please enter a valid number"
+  },
+  "results": {
+    "title": "💰 Tax Calculation Results",
+    "annual_income_ves": "Annual Income (VES):",
+    "annual_income_usd": "Annual Income (USD):",
+    "income_ut": "Income in UT:",
+    "standard_deduction": "Standard Deduction:",
+    "taxable_income": "Taxable Income:",
+    "marginal_rate": "Marginal Tax Rate:",
+    "taxpayer_credit": "Taxpayer Tax Credit:",
+    "dependent_credits": "Dependent Tax Credits ({count}):",
+    "total_tax_ut": "Total Tax (UT):",
+    "total_tax_ves": "Total Tax (VES):",
+    "total_tax_usd": "Total Tax (USD):",
+    "effective_rate": "Effective Tax Rate:",
+    "net_income_ves": "Net Income (VES):",
+    "net_income_usd": "Net Income (USD):"
+  },
+  "brackets": {
+    "title": "📊 ISLR Venezuela Tax Brackets",
+    "income_range_ut": "Income Range (UT)",
+    "income_range_bs": "Income Range (Bs.)",
+    "tax_rate": "Tax Rate",
+    "subtract_ut": "Subtrahend (UT)"
+  },
+  "breakdown": {
+    "title": "🔢 Calculation Breakdown",
+    "step": "Step"
+  },
+  "messages": {
+    "goodbye": "✨ Thank you for using the ISLR Calculator!",
+    "no_income_specified": "⚠️  No income specified, no tax to calculate."
+  },
+  "prompts": {
+    "show_calculation_breakdown": "Show calculation breakdown?",
+    "calculate_another_income": "Calculate for another income?",
+    "return_to_main_menu": "Return to main menu?"
+  },
+  "calculation": {
+    "annual_income": "Annual Income:",
+    "standard_deduction": "Standard Deduction:",
+    "taxable": "taxable",
+    "tax_bracket": "Tax Bracket:",
+    "tax_calculation": "Tax Calculation:",
+    "no_taxable_income": "No taxable income (after standard deduction)",
+    "contributor_credit": "Contributor Credit",
+    "dependents": "Dependents",
+    "apply_tax_credits": "Apply Tax Credits",
+    "final": "final",
+    "tax_credits_not_applicable": "Tax Credits (not applicable, no tax owed):",
+    "convert_to_ves": "Convert to VES:",
+    "effective_rate_calc": "Effective Rate:"
+  },
+  "config_errors": {
+    "ut_value_not_set": "Error: UT_VALUE environment variable is not set.",
+    "please_set_ut_value": "Please set UT_VALUE before running the calculator.",
+    "example_ut_value": "Example: export UT_VALUE=43.0",
+    "ut_value_invalid": "Error: UT_VALUE '{value}' is not a valid number.",
+    "usd_rate_not_set": "Error: USD_TO_VES environment variable is not set.",
+    "please_set_usd_rate": "Please set USD_TO_VES before running the calculator.",
+    "example_usd_rate": "Example: export USD_TO_VES=50.0",
+    "usd_rate_invalid": "Error: USD_TO_VES '{value}' is not a valid number.",
+    "standard_deduction_not_set": "Error: STANDARD_DEDUCTION_UT environment variable is not set.",
+    "please_set_standard_deduction": "Please set STANDARD_DEDUCTION_UT before running the calculator.",
+    "example_standard_deduction": "Example: export STANDARD_DEDUCTION_UT=775",
+    "standard_deduction_invalid": "Error: STANDARD_DEDUCTION_UT '{value}' is not a valid number.",
+    "taxpayer_credit_not_set": "Error: TAXPAYER_CREDIT_UT environment variable is not set.",
+    "please_set_taxpayer_credit": "Please set TAXPAYER_CREDIT_UT before running the calculator.",
+    "example_taxpayer_credit": "Example: export TAXPAYER_CREDIT_UT=10",
+    "taxpayer_credit_invalid": "Error: TAXPAYER_CREDIT_UT '{value}' is not a valid number.",
+    "dependent_credit_not_set": "Error: DEPENDENT_CREDIT_UT environment variable is not set.",
+    "please_set_dependent_credit": "Please set DEPENDENT_CREDIT_UT before running the calculator.",
+    "example_dependent_credit": "Example: export DEPENDENT_CREDIT_UT=10",
+    "dependent_credit_invalid": "Error: DEPENDENT_CREDIT_UT '{value}' is not a valid number.",
+    "no_brackets_found": "Error: No tax brackets found in {filename}",
+    "brackets_file_not_found": "Error: Tax brackets file '{filename}' not found.",
+    "ensure_csv_exists": "Please ensure the CSV file exists in the project directory.",
+    "invalid_csv_format": "Error: Invalid format in tax brackets CSV: {error}",
+    "expected_columns": "Expected columns: min_ut, max_ut, rate, subtract_ut"
+  }
+}

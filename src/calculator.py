@@ -3,7 +3,8 @@ Calculator module for ISLR tax calculations
 Contains the ISLRCalculator class with all calculation methods
 """
 
-from src.models import CalculationStep, TaxBracket, TaxCalculationResult, Currency
+from src.i18n import t
+from src.models import CalculationStep, Currency, TaxBracket, TaxCalculationResult
 
 
 class ISLRCalculator:
@@ -14,7 +15,7 @@ class ISLRCalculator:
         ut_value: float,
         usd_to_ves: float,
         standard_deduction_ut: float,
-        contributor_credit_ut: float,
+        taxpayer_credit_ut: float,
         dependent_credit_ut: float,
         tax_brackets: list[TaxBracket],
     ):
@@ -25,14 +26,14 @@ class ISLRCalculator:
             ut_value: Current value of Unidad Tributaria
             usd_to_ves: USD to VES exchange rate
             standard_deduction_ut: Standard deduction in UT (reduces income)
-            contributor_credit_ut: Contributor tax credit in UT (reduces tax)
+            taxpayer_credit_ut: Contributor tax credit in UT (reduces tax)
             dependent_credit_ut: Tax credit per dependent in UT (reduces tax)
             tax_brackets: List of TaxBracket objects
         """
         self.ut_value = ut_value
         self.usd_to_ves = usd_to_ves
         self.standard_deduction_ut = standard_deduction_ut
-        self.contributor_credit_ut = contributor_credit_ut
+        self.taxpayer_credit_ut = taxpayer_credit_ut
         self.dependent_credit_ut = dependent_credit_ut
         self.tax_brackets = tax_brackets
 
@@ -97,10 +98,10 @@ class ISLRCalculator:
         else:
             tax_before_credits_ut = 0
 
-        # Step 5: Apply tax credits (contributor + dependents)
+        # Step 5: Apply tax credits (taxpayer + dependents)
         dependents_credit_ut = dependents * self.dependent_credit_ut
-        contributor_credit_ut = self.contributor_credit_ut
-        total_credits_ut = contributor_credit_ut + dependents_credit_ut
+        taxpayer_credit_ut = self.taxpayer_credit_ut
+        total_credits_ut = taxpayer_credit_ut + dependents_credit_ut
 
         # Final tax after credits
         total_tax_ut = max(0, tax_before_credits_ut - total_credits_ut)
@@ -123,7 +124,7 @@ class ISLRCalculator:
             standard_deduction_ut=self.standard_deduction_ut,
             dependents=dependents,
             dependents_credit_ut=dependents_credit_ut,
-            contributor_credit_ut=contributor_credit_ut,
+            taxpayer_credit_ut=taxpayer_credit_ut,
             taxable_income_ut=taxable_income_ut,
             bracket_rate=applicable_bracket.rate * 100 if applicable_bracket else 0,
             total_tax_ut=total_tax_ut,
@@ -158,7 +159,7 @@ class ISLRCalculator:
         steps.append(
             CalculationStep(
                 step="1",
-                description=f"Annual Income: {result.annual_income_ves:,.2f} Bs ÷ {self.ut_value} Bs/UT",
+                description=f"{t('calculation.annual_income')} {result.annual_income_ves:,.2f} Bs ÷ {self.ut_value} Bs/UT",
                 result=f"{result.income_ut:,.2f} UT",
             )
         )
@@ -167,8 +168,8 @@ class ISLRCalculator:
         steps.append(
             CalculationStep(
                 step="2",
-                description=f"Standard Deduction: {result.income_ut:,.2f} UT - {result.standard_deduction_ut:.0f} UT",
-                result=f"{result.taxable_income_ut:,.2f} UT (taxable)",
+                description=f"{t('calculation.standard_deduction')} {result.income_ut:,.2f} UT - {result.standard_deduction_ut:.0f} UT",
+                result=f"{result.taxable_income_ut:,.2f} UT ({t('calculation.taxable')})",
             )
         )
 
@@ -179,7 +180,7 @@ class ISLRCalculator:
             steps.append(
                 CalculationStep(
                     step="3",
-                    description=f"Tax Bracket: {bracket.min_ut:,.0f} - {max_ut} UT ({bracket.rate * 100:.0f}%)",
+                    description=f"{t('calculation.tax_bracket')} {bracket.min_ut:,.0f} - {max_ut} UT ({bracket.rate * 100:.0f}%)",
                     result="",
                 )
             )
@@ -188,7 +189,7 @@ class ISLRCalculator:
             steps.append(
                 CalculationStep(
                     step="4",
-                    description=f"Tax Calculation: ({result.taxable_income_ut:,.2f} UT × {bracket.rate * 100:.0f}%) - {bracket.subtract_ut:.0f} UT",
+                    description=f"{t('calculation.tax_calculation')} ({result.taxable_income_ut:,.2f} UT × {bracket.rate * 100:.0f}%) - {bracket.subtract_ut:.0f} UT",
                     result=f"{result.tax_before_credits_ut:,.2f} UT",
                 )
             )
@@ -197,26 +198,28 @@ class ISLRCalculator:
             steps.append(
                 CalculationStep(
                     step="3",
-                    description="No taxable income (after standard deduction)",
+                    description=t("calculation.no_taxable_income"),
                     result="0.00 UT",
                 )
             )
 
         # Step 5: Apply tax credits (use stored values)
-        credit_parts = [f"{result.contributor_credit_ut:.0f} UT"]
+        credit_parts = [f"{result.taxpayer_credit_ut:.0f} UT"]
         if result.dependents > 0:
             credit_parts.append(f"{result.dependents_credit_ut:.0f} UT")
 
         if result.tax_before_credits_ut > 0:
-            credit_desc_parts = ["Contributor Credit"]
+            credit_desc_parts = [t("calculation.contributor_credit")]
             if result.dependents > 0:
-                credit_desc_parts.append(f"Dependents ({result.dependents})")
+                credit_desc_parts.append(
+                    f"{t('calculation.dependents')} ({result.dependents})"
+                )
 
             steps.append(
                 CalculationStep(
                     step="5",
-                    description=f"Apply Tax Credits [{', '.join(credit_desc_parts)}]: {result.tax_before_credits_ut:,.2f} UT - {' - '.join(credit_parts)}",
-                    result=f"{result.total_tax_ut:,.2f} UT (final)",
+                    description=f"{t('calculation.apply_tax_credits')} [{', '.join(credit_desc_parts)}]: {result.tax_before_credits_ut:,.2f} UT - {' - '.join(credit_parts)}",
+                    result=f"{result.total_tax_ut:,.2f} UT ({t('calculation.final')})",
                 )
             )
         else:
@@ -224,8 +227,8 @@ class ISLRCalculator:
             steps.append(
                 CalculationStep(
                     step="5",
-                    description=f"Tax Credits (not applicable, no tax owed): {result.total_credits_ut:.0f} UT",
-                    result=f"{result.total_tax_ut:,.2f} UT (final)",
+                    description=f"{t('calculation.tax_credits_not_applicable')} {result.total_credits_ut:.0f} UT",
+                    result=f"{result.total_tax_ut:,.2f} UT ({t('calculation.final')})",
                 )
             )
 
@@ -233,7 +236,7 @@ class ISLRCalculator:
         steps.append(
             CalculationStep(
                 step="6",
-                description=f"Convert to VES: {result.total_tax_ut:,.2f} UT × {self.ut_value} Bs/UT",
+                description=f"{t('calculation.convert_to_ves')} {result.total_tax_ut:,.2f} UT × {self.ut_value} Bs/UT",
                 result=f"{result.total_tax_ves:,.2f} Bs",
             )
         )
@@ -242,7 +245,7 @@ class ISLRCalculator:
         steps.append(
             CalculationStep(
                 step="7",
-                description=f"Effective Rate: {result.total_tax_ves:,.2f} Bs ÷ {result.annual_income_ves:,.2f} Bs",
+                description=f"{t('calculation.effective_rate_calc')} {result.total_tax_ves:,.2f} Bs ÷ {result.annual_income_ves:,.2f} Bs",
                 result=f"{result.effective_rate:.2f}%",
             )
         )
