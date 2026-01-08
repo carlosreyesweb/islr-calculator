@@ -5,10 +5,10 @@ Calculates income tax based on Venezuelan tax brackets using Unidad Tributaria (
 
 from rich.console import Console
 
-from calculator import ISLRCalculator
-from config import load_config
-from console import ConsoleUI
-from models import Currency
+from src.calculator import ISLRCalculator
+from src.config import load_config
+from src.console import ConsoleUI
+from src.models import Currency
 
 
 def main():

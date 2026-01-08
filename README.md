@@ -56,8 +56,8 @@ min_ut,max_ut,rate,subtract_ut
 uv sync # creates environment and installs dependencies
 # or
 python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+source .venv/bin/activate # or .venv\Scripts\activate on Windows
+pip install -e .
 ```
 
 ## Usage
@@ -65,9 +65,9 @@ pip install -r requirements.txt
 Run the calculator:
 
 ```bash
-python main.py
-# or with uv
 uv run main.py
+# or (if an environment is already set up)
+python main.py
 ```
 
 ## License

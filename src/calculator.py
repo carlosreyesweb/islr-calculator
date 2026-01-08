@@ -3,7 +3,7 @@ Calculator module for ISLR tax calculations
 Contains the ISLRCalculator class with all calculation methods
 """
 
-from models import CalculationStep, TaxBracket, TaxCalculationResult, Currency
+from src.models import CalculationStep, TaxBracket, TaxCalculationResult, Currency
 
 
 class ISLRCalculator:

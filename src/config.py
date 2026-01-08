@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from rich.console import Console
 
-from models import TaxBracket
+from src.models import TaxBracket
 
 
 @dataclass
@@ -145,7 +145,7 @@ def load_config(console: Console) -> Config:
 
 
 def load_tax_brackets_from_csv(
-    console: Console, filepath: str = "tax_brackets.csv"
+    console: Console, filename: str = "tax_brackets.csv"
 ) -> list[TaxBracket]:
     """
     Load tax brackets from a CSV file
@@ -158,7 +158,8 @@ def load_tax_brackets_from_csv(
         List of TaxBracket objects
     """
     brackets = []
-    csv_path = Path(__file__).parent / filepath
+    csv_path = Path(__file__).parent.parent / filename
+    print(csv_path)
 
     try:
         with open(csv_path, "r", encoding="utf-8") as file:
@@ -176,7 +177,7 @@ def load_tax_brackets_from_csv(
 
         if not brackets:
             console.print(
-                f"[bold red]Error: No tax brackets found in {filepath}[/bold red]"
+                f"[bold red]Error: No tax brackets found in {filename}[/bold red]"
             )
             sys.exit(1)
 
@@ -184,7 +185,7 @@ def load_tax_brackets_from_csv(
 
     except FileNotFoundError:
         console.print(
-            f"[bold red]Error: Tax brackets file '{filepath}' not found.[/bold red]"
+            f"[bold red]Error: Tax brackets file '{filename}' not found.[/bold red]"
         )
         console.print(
             "[yellow]Please ensure the CSV file exists in the project directory.[/yellow]"

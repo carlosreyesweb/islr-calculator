@@ -11,7 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from models import CalculationStep, Currency, TaxBracket, TaxCalculationResult
+from src.models import CalculationStep, Currency, TaxBracket, TaxCalculationResult
 
 
 class ConsoleUI:
