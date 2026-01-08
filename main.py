@@ -24,11 +24,19 @@ def main():
         ut_value=config.ut_value,
         usd_to_ves=config.usd_to_ves,
         standard_deduction_ut=config.standard_deduction_ut,
+        contributor_credit_ut=config.contributor_credit_ut,
+        dependent_credit_ut=config.dependent_credit_ut,
         tax_brackets=config.tax_brackets,
     )
 
     ui.clear()
-    ui.display_header(config.ut_value, config.usd_to_ves, config.standard_deduction_ut)
+    ui.display_header(
+        config.ut_value,
+        config.usd_to_ves,
+        config.standard_deduction_ut,
+        config.contributor_credit_ut,
+        config.dependent_credit_ut,
+    )
 
     while True:
         # Display menu and get choice
@@ -37,6 +45,9 @@ def main():
         if choice == "1":
             # Calculate tax with standard deduction
             monthly_income, currency = ui.get_monthly_income()
+
+            # Get number of dependents
+            dependents = ui.get_number_of_dependents()
 
             # Convert to VES if needed
             if currency == Currency.USD:
@@ -52,8 +63,8 @@ def main():
                 )
                 continue
 
-            # Calculate tax with standard deduction
-            result = calculator.calculate_tax(annual_income_ves, currency)
+            # Calculate tax with deductions (standard + contributor + dependents)
+            result = calculator.calculate_tax(annual_income_ves, currency, dependents)
 
             # Display results
             ui.display_results(result)

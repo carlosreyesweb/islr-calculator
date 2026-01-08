@@ -22,6 +22,8 @@ class Config:
     ut_value: float
     usd_to_ves: float
     standard_deduction_ut: float
+    contributor_credit_ut: float
+    dependent_credit_ut: float
     tax_brackets: list[TaxBracket]
 
 
@@ -89,6 +91,46 @@ def load_config(console: Console) -> Config:
         )
         sys.exit(1)
 
+    # Get CONTRIBUTOR_CREDIT_UT from environment variable
+    contributor_credit_ut_str = os.getenv("CONTRIBUTOR_CREDIT_UT")
+    if contributor_credit_ut_str is None:
+        console.print(
+            "[bold red]Error: CONTRIBUTOR_CREDIT_UT environment variable is not set.[/bold red]"
+        )
+        console.print(
+            "[yellow]Please set CONTRIBUTOR_CREDIT_UT before running the calculator.[/yellow]"
+        )
+        console.print("[dim]Example: export CONTRIBUTOR_CREDIT_UT=10[/dim]")
+        sys.exit(1)
+
+    try:
+        contributor_credit_ut = float(contributor_credit_ut_str)
+    except ValueError:
+        console.print(
+            f"[bold red]Error: CONTRIBUTOR_CREDIT_UT '{contributor_credit_ut_str}' is not a valid number.[/bold red]"
+        )
+        sys.exit(1)
+
+    # Get DEPENDENT_CREDIT_UT from environment variable
+    dependent_credit_ut_str = os.getenv("DEPENDENT_CREDIT_UT")
+    if dependent_credit_ut_str is None:
+        console.print(
+            "[bold red]Error: DEPENDENT_CREDIT_UT environment variable is not set.[/bold red]"
+        )
+        console.print(
+            "[yellow]Please set DEPENDENT_CREDIT_UT before running the calculator.[/yellow]"
+        )
+        console.print("[dim]Example: export DEPENDENT_CREDIT_UT=10[/dim]")
+        sys.exit(1)
+
+    try:
+        dependent_credit_ut = float(dependent_credit_ut_str)
+    except ValueError:
+        console.print(
+            f"[bold red]Error: DEPENDENT_CREDIT_UT '{dependent_credit_ut_str}' is not a valid number.[/bold red]"
+        )
+        sys.exit(1)
+
     # Load tax brackets
     tax_brackets = load_tax_brackets_from_csv(console)
 
@@ -96,6 +138,8 @@ def load_config(console: Console) -> Config:
         ut_value=ut_value,
         usd_to_ves=usd_to_ves,
         standard_deduction_ut=standard_deduction_ut,
+        contributor_credit_ut=contributor_credit_ut,
+        dependent_credit_ut=dependent_credit_ut,
         tax_brackets=tax_brackets,
     )
 

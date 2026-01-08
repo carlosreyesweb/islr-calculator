@@ -32,7 +32,9 @@ class TaxCalculationResult:
     annual_income_usd: float
     income_ut: float
     standard_deduction_ut: float
-    deduction_ut: float
+    dependents: int
+    dependents_credit_ut: float
+    contributor_credit_ut: float
     taxable_income_ut: float
     bracket_rate: float
     total_tax_ut: float
@@ -43,6 +45,10 @@ class TaxCalculationResult:
     effective_rate: float
     currency: Currency
     usd_rate: float
+    # Store intermediate values to avoid recalculation
+    tax_before_credits_ut: float
+    applicable_bracket: TaxBracket | None
+    total_credits_ut: float
 
 
 @dataclass

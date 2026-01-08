@@ -48,14 +48,31 @@ class ConsoleUI:
         self.console.print(*args, **kwargs)
 
     def display_header(
-        self, ut_value: float, usd_to_ves: float, standard_deduction_ut: float
+        self,
+        ut_value: float,
+        usd_to_ves: float,
+        standard_deduction_ut: float,
+        contributor_credit_ut: float,
+        dependent_credit_ut: float,
     ):
         """Display the application header"""
         title = Text("🇻🇪 Venezuelan Income Tax Calculator (ISLR)", style="bold blue")
+
+        # Create a table for organized display
+        info_table = Table(show_header=False, box=None, padding=(0, 2))
+        info_table.add_column("Label", style="bold cyan")
+        info_table.add_column("Value", style="bold white")
+
+        info_table.add_row("UT Value:", f"{ut_value} Bs.")
+        info_table.add_row("USD Rate:", f"{usd_to_ves} Bs.")
+        info_table.add_row("Standard Deduction:", f"{standard_deduction_ut} UT")
+        info_table.add_row("Contributor Credit:", f"{contributor_credit_ut} UT")
+        info_table.add_row("Dependent Credit:", f"{dependent_credit_ut} UT")
+
         self.console.print(
             Panel(
-                title,
-                subtitle=f"UT: {ut_value} Bs. | USD Rate: {usd_to_ves} Bs. | Standard Deduction: {standard_deduction_ut} UT",
+                info_table,
+                title=title,
                 border_style="blue",
             )
         )
@@ -78,6 +95,39 @@ class ConsoleUI:
         ).ask()
 
         return choice if choice else "3"
+
+    def get_number_of_dependents(self) -> int:
+        """
+        Prompt user for number of dependents and validate input
+
+        Returns:
+            Number of dependents (int)
+        """
+        while True:
+            try:
+                dependents_str = questionary.text(
+                    "How many direct dependents do you have?:",
+                    validate=lambda text: text.isdigit()
+                    or text == ""
+                    or "Please enter a valid number",
+                    style=self.qstyle,
+                    default="0",
+                ).ask()
+
+                if dependents_str is None:
+                    return 0
+
+                dependents = int(dependents_str)
+                if dependents < 0:
+                    self.console.print(
+                        "[red]❌ Number of dependents cannot be negative. Please try again.[/red]"
+                    )
+                    continue
+                return dependents
+            except ValueError:
+                self.console.print(
+                    "[red]❌ Invalid input. Please enter a valid whole number.[/red]"
+                )
 
     def get_monthly_income(self) -> tuple[float, Currency]:
         """
@@ -178,8 +228,15 @@ class ConsoleUI:
             "Standard Deduction:", f"{result.standard_deduction_ut:,.2f} UT"
         )
         results_table.add_row("Taxable Income:", f"{result.taxable_income_ut:,.2f} UT")
-        results_table.add_row("", "")
         results_table.add_row("Marginal Tax Rate:", f"{result.bracket_rate:.0f}%")
+        results_table.add_row(
+            "Contributor Tax Credit:", f"{result.contributor_credit_ut:.2f} UT"
+        )
+        if result.dependents > 0:
+            results_table.add_row(
+                f"Dependent Tax Credits ({result.dependents}):",
+                f"{result.dependents_credit_ut:,.2f} UT",
+            )
         results_table.add_row("", "")
         results_table.add_row(
             "Total Tax (UT):", f"[bold yellow]{result.total_tax_ut:,.2f} UT[/]"

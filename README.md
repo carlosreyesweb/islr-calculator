@@ -24,7 +24,9 @@ cd islr-calculator
 ```bash
 UT_VALUE=43.0                    # Current UT value in Bs.
 USD_TO_VES=295                   # Exchange rate from Central Bank of Venezuela
-STANDARD_DEDUCTION_UT=775        # Standard deduction
+STANDARD_DEDUCTION_UT=775        # Standard deduction (reduces taxable income)
+CONTRIBUTOR_CREDIT_UT=10         # Tax credit for the contributor (reduces tax)
+DEPENDENT_CREDIT_UT=10           # Tax credit per dependent (reduces tax)
 ```
 
 3. Configure tax brackets (optional):
