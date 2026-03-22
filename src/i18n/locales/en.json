@@ -61,7 +61,9 @@
   },
   "messages": {
     "goodbye": "Thank you for using the ISLR Calculator!",
-    "no_income_specified": "[!] No income entered - nothing to calculate."
+    "no_income_specified": "[!] No income entered - nothing to calculate.",
+    "credit_header": "by carlosreyesweb  |  contact@carlosreyesweb.com",
+    "credit_footer": "Built by carlosreyesweb -- github.com/carlosreyesweb/islr-calculator"
   },
   "prompts": {
     "show_installment_plan": "Would you like to see how to split this into 3 payments?",

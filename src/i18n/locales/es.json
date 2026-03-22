@@ -61,7 +61,9 @@
   },
   "messages": {
     "goodbye": "¡Gracias por usar la Calculadora ISLR!",
-    "no_income_specified": "[!] No ingresaste un monto - no hay nada que calcular."
+    "no_income_specified": "[!] No ingresaste un monto - no hay nada que calcular.",
+    "credit_header": "by carlosreyesweb  |  contact@carlosreyesweb.com",
+    "credit_footer": "Built by carlosreyesweb -- github.com/carlosreyesweb/islr-calculator"
   },
   "prompts": {
     "show_installment_plan": "¿Quieres ver cómo dividir el pago en 3 cuotas?",

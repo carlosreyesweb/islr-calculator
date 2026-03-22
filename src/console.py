@@ -74,6 +74,11 @@ class ConsoleUI:
         )
         info_table.add_row(t("header.taxpayer_credit"), f"{taxpayer_credit_ut} UT")
         info_table.add_row(t("header.dependent_credit"), f"{dependent_credit_ut} UT")
+        info_table.add_row("", "")
+        info_table.add_row(
+            Text(t("messages.credit_header"), style="dim"),
+            "",
+        )
 
         self.console.print(Panel(info_table, title=title, border_style="blue"))
 
@@ -421,5 +426,6 @@ class ConsoleUI:
         return result if result is not None else default
 
     def show_goodbye_message(self):
-        """Display goodbye message"""
-        self.console.print(f"[bold green]{t('messages.goodbye')}[/bold green]")
+        """Display goodbye message with developer credit"""
+        self.console.print(f"\n[bold green]{t('messages.goodbye')}[/bold green]")
+        self.console.print(f"[dim]{t('messages.credit_footer')}[/dim]\n")
