@@ -1,14 +1,17 @@
-# 🇻🇪 Venezuelan Income Tax Calculator (ISLR)
+# Venezuelan Income Tax Calculator (ISLR)
 
-A friendly terminal-based calculator for Venezuelan individual income tax (Impuesto Sobre la Renta - ISLR) with a beautiful user interface powered by Rich.
+A terminal-based calculator for Venezuelan individual income tax (Impuesto Sobre la Renta - ISLR).
 
 ## Features
 
-- 💰 Calculate income tax from monthly income (VES or USD)
-- 📊 View tax brackets in UT and Bs.
-- 🎨 Beautiful terminal UI
-- 📈 Shows effective tax rate and net income
-- 🔢 Optional calculation breakdown
+- Two modes: **Declaration** (last year's actual income) and **Simulation** (project this year's tax from monthly income)
+- Supports income in Bolivares (Bs.) or US Dollars (USD)
+- Accounts for dependents, standard deduction, and taxpayer credits
+- Shows tax owed, net income, and effective rate
+- Optional 3-installment payment plan with SENIAT-correct due dates
+- Optional step-by-step calculation breakdown in plain language
+- View current tax brackets in UT and Bs.
+- Available in English and Spanish (`ISLR_LANG=en` or `ISLR_LANG=es`)
 
 ## Installation
 
@@ -19,20 +22,35 @@ git clone https://github.com/carlosreyesweb/islr-calculator.git
 cd islr-calculator
 ```
 
-2. Create a `.env` file with these values:
+2. Install dependencies:
 
 ```bash
-ISLR_LANG=en                     # Language code (e.g., en, es)
-UT_VALUE=43.0                    # Current UT value in Bs.
-USD_TO_VES=295                   # Exchange rate from Central Bank of Venezuela
-STANDARD_DEDUCTION_UT=775        # Standard deduction (reduces taxable income)
-TAXPAYER_CREDIT_UT=10         # Tax credit for the taxpayer (reduces tax)
-DEPENDENT_CREDIT_UT=10           # Tax credit per dependent (reduces tax)
+uv sync
+# or
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e .
 ```
 
-3. Configure tax brackets (optional):
+3. Create a `.env` file. Copy `.env.example` as a starting point:
 
-The tax brackets are loaded from `tax_brackets.csv`. You can modify this file to update the brackets without changing the code:
+```bash
+cp .env.example .env
+```
+
+Then update the values to match the current fiscal year:
+
+```env
+ISLR_LANG=es                  # Language: en or es
+UT_VALUE=43                   # Current Unidad Tributaria value in Bs.
+USD_TO_VES=457.07             # USD/Bs. exchange rate (BCV)
+STANDARD_DEDUCTION_UT=774     # Standard deduction in UT (reduces taxable income)
+TAXPAYER_CREDIT_UT=10         # Tax credit for the taxpayer in UT (reduces tax owed)
+DEPENDENT_CREDIT_UT=10        # Tax credit per dependent in UT (reduces tax owed)
+INSTALLMENT_DAYS=20           # Days between installment payments from the March 31 deadline
+```
+
+4. (Optional) Update tax brackets in `tax_brackets.csv` if SENIAT publishes new ones:
 
 ```csv
 min_ut,max_ut,rate,subtract_ut
@@ -46,35 +64,55 @@ min_ut,max_ut,rate,subtract_ut
 6000,inf,0.34,875
 ```
 
-- `min_ut`: Minimum income in UT for this bracket
-- `max_ut`: Maximum income in UT for this bracket (use `inf` for unlimited)
-- `rate`: Tax rate as a decimal (e.g., 0.06 for 6%)
-- `subtract_ut`: Amount to subtract in UT when calculating tax
+Column reference:
 
-4. Install dependencies:
-
-```bash
-uv sync # creates environment and installs dependencies
-# or
-python3 -m venv .venv
-source .venv/bin/activate # or .venv\Scripts\activate on Windows
-pip install -e .
-```
+| Column | Description |
+|---|---|
+| `min_ut` | Lower bound of the bracket in UT |
+| `max_ut` | Upper bound in UT (`inf` for the top bracket) |
+| `rate` | Tax rate as a decimal (e.g. `0.34` for 34%) |
+| `subtract_ut` | Bracket subtraction constant in UT |
 
 ## Usage
 
-Run the calculator:
-
 ```bash
 uv run main.py
-# or (if an environment is already set up)
+# or
 python main.py
 ```
 
-## License
+### Declaration mode
 
-This project is open source and available under the MIT License.
+Use this when you have your **total annual income for last year** and want to know exactly what you owe before filing at SENIAT. The calculator will show:
+
+- Tax owed in Bs. and USD
+- Net income after tax
+- Effective tax rate
+- Optional 3-installment payment plan with exact due dates (filing date, April 20, May 10)
+- Optional step-by-step breakdown
+
+### Simulation mode
+
+Use this to **estimate what your tax will be** based on your current monthly income. The calculator annualizes the monthly figure and shows a projected tax. No installment plan is shown since the year is not yet closed.
+
+### Installment payment plan
+
+When calculating last year's tax, the calculator can show your payment split into 3 equal installments per SENIAT rules:
+
+- **1st installment:** on your filing date
+- **2nd installment:** 20 days after March 31
+- **3rd installment:** 40 days after March 31
+
+The interval is configurable via `INSTALLMENT_DAYS` in case SENIAT modifies the rules.
+
+## Notes on exchange rate
+
+The `USD_TO_VES` rate should reflect the official BCV (Banco Central de Venezuela) rate at the time of declaration. This affects the USD equivalent figures shown for reference — all tax calculations are done in Bs.
 
 ## Disclaimer
 
-This calculator is for informational purposes only. Please consult with a qualified tax professional for official tax advice and calculations. Tax rates and brackets may change over time.
+This calculator is for informational purposes only. Tax rates, brackets, and rules may change. Always verify your declaration with SENIAT or a qualified tax professional.
+
+## License
+
+MIT
