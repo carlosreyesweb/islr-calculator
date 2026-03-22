@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "🇻🇪 Venezuelan Income Tax Calculator (ISLR)"
+    "title": "Venezuelan Income Tax Calculator (ISLR)"
   },
   "header": {
     "ut_value": "UT Value:",
@@ -11,75 +11,81 @@
   },
   "menu": {
     "prompt": "What would you like to do?",
-    "calculate_tax": "💰 Calculate income tax",
-    "view_brackets": "📊 View tax brackets",
-    "exit": "🚪 Exit"
+    "declare_tax": "[1] Calculate tax on last year's income",
+    "simulate_tax": "[2] Estimate tax on this year's income",
+    "view_brackets": "[3] View tax brackets",
+    "exit": "[4] Exit"
   },
   "input": {
-    "dependents_prompt": "How many direct dependents do you have?:",
-    "currency_prompt": "Select currency:",
-    "income_prompt": "Enter your monthly income in {currency}:",
-    "currency_ves": "🇻🇪 VES (Bolívares)",
-    "currency_usd": "💵 USD (Dollars)"
+    "currency_prompt": "In which currency is your income recorded?",
+    "currency_ves": "Bolivares (Bs.)",
+    "currency_usd": "US Dollars (USD)",
+    "income_prompt_declaration": "What was your total income for last year in {currency}?",
+    "income_prompt_simulation": "What is your current monthly income in {currency}?",
+    "dependents_prompt": "Do you have any direct dependents (children, parents, etc.)? How many?",
+    "declaration_date_prompt": "When do you plan to file? Leave blank to use the deadline (31/03/{year}):"
   },
   "errors": {
-    "negative_dependents": "❌ Number of dependents cannot be negative. Please try again.",
-    "invalid_number": "❌ Invalid input. Please enter a valid number.",
-    "invalid_whole_number": "❌ Invalid input. Please enter a valid whole number.",
-    "negative_income": "❌ Income cannot be negative. Please try again.",
-    "enter_valid_number": "Please enter a valid number"
+    "negative_dependents": "[x] Number of dependents cannot be negative. Please try again.",
+    "invalid_number": "[x] That doesn't look like a valid number. Please try again.",
+    "invalid_whole_number": "[x] Please enter a whole number.",
+    "negative_income": "[x] Income cannot be negative. Please try again.",
+    "enter_valid_number": "Please enter a valid number",
+    "invalid_date": "[x] Invalid date. Please use the format DD/MM/YYYY."
   },
   "results": {
-    "title": "💰 Tax Calculation Results",
-    "annual_income_ves": "Annual Income (VES):",
-    "annual_income_usd": "Annual Income (USD):",
-    "income_ut": "Income in UT:",
-    "standard_deduction": "Standard Deduction:",
-    "taxable_income": "Taxable Income:",
-    "marginal_rate": "Marginal Tax Rate:",
-    "taxpayer_credit": "Taxpayer Tax Credit:",
-    "dependent_credits": "Dependent Tax Credits ({count}):",
-    "total_tax_ut": "Total Tax (UT):",
-    "total_tax_ves": "Total Tax (VES):",
-    "total_tax_usd": "Total Tax (USD):",
-    "effective_rate": "Effective Tax Rate:",
-    "net_income_ves": "Net Income (VES):",
-    "net_income_usd": "Net Income (USD):"
+    "title": "Your Tax Results",
+    "title_simulation": "Estimated Tax (Simulation)",
+    "simulation_notice": "[!] Projection based on your monthly income x 12. Your actual tax may differ.",
+    "details_header": "How it was calculated",
+    "annual_income": "Annual income:",
+    "marginal_rate": "Tax rate applied:",
+    "credits_applied": "Credits applied:",
+    "simulation_monthly_basis": "Based on monthly income:",
+    "total_tax_ves": "Tax owed (Bs.):",
+    "total_tax_usd": "Tax owed (USD):",
+    "effective_rate": "Effective rate:",
+    "net_income_ves": "Net income (Bs.):",
+    "net_income_usd": "Net income (USD):"
   },
   "brackets": {
-    "title": "📊 ISLR Venezuela Tax Brackets",
+    "title": "ISLR Venezuela Tax Brackets",
     "income_range_ut": "Income Range (UT)",
     "income_range_bs": "Income Range (Bs.)",
     "tax_rate": "Tax Rate",
     "subtract_ut": "Subtrahend (UT)"
   },
   "breakdown": {
-    "title": "🔢 Calculation Breakdown",
+    "title": "Calculation Breakdown",
     "step": "Step"
   },
   "messages": {
-    "goodbye": "✨ Thank you for using the ISLR Calculator!",
-    "no_income_specified": "⚠️  No income specified, no tax to calculate."
+    "goodbye": "Thank you for using the ISLR Calculator!",
+    "no_income_specified": "[!] No income entered - nothing to calculate."
   },
   "prompts": {
-    "show_calculation_breakdown": "Show calculation breakdown?",
+    "show_installment_plan": "Would you like to see how to split this into 3 payments?",
+    "show_calculation_breakdown": "Would you like to see how this was calculated?",
     "calculate_another_income": "Calculate for another income?",
+    "simulate_another_income": "Run another simulation?",
     "return_to_main_menu": "Return to main menu?"
   },
+  "installments": {
+    "title": "Installment Payment Plan",
+    "installment_col": "Installment",
+    "date_col": "Due Date",
+    "amount_ves_col": "Amount (Bs.)",
+    "amount_usd_col": "Amount (USD)",
+    "note": "1st installment on your filing date. 2nd and 3rd are {days} and {days_x2} days after the March 31 deadline, per SENIAT rules."
+  },
   "calculation": {
-    "annual_income": "Annual Income:",
-    "standard_deduction": "Standard Deduction:",
-    "taxable": "taxable",
-    "tax_bracket": "Tax Bracket:",
-    "tax_calculation": "Tax Calculation:",
-    "no_taxable_income": "No taxable income (after standard deduction)",
-    "contributor_credit": "Contributor Credit",
-    "dependents": "Dependents",
-    "apply_tax_credits": "Apply Tax Credits",
-    "final": "final",
-    "tax_credits_not_applicable": "Tax Credits (not applicable, no tax owed):",
-    "convert_to_ves": "Convert to VES:",
-    "effective_rate_calc": "Effective Rate:"
+    "income": "Annual income:",
+    "income_usd": "Annual income ({usd} x {rate} Bs/$):",
+    "deduction": "Minus standard deduction ({income} Bs. - {deduction} Bs.):",
+    "rate_applied": "Tax rate {rate}% on {taxable} Bs. taxable income:",
+    "credits": "Minus credits ({tax} Bs. - {credits} Bs.):",
+    "no_taxable_income": "Income falls below the standard deduction - no tax owed.",
+    "effective_rate_calc": "Effective rate ({tax} Bs. / {income} Bs.):"
   },
   "config_errors": {
     "ut_value_not_set": "Error: UT_VALUE environment variable is not set.",
@@ -88,11 +94,11 @@
     "ut_value_invalid": "Error: UT_VALUE '{value}' is not a valid number.",
     "usd_rate_not_set": "Error: USD_TO_VES environment variable is not set.",
     "please_set_usd_rate": "Please set USD_TO_VES before running the calculator.",
-    "example_usd_rate": "Example: export USD_TO_VES=50.0",
+    "example_usd_rate": "Example: export USD_TO_VES=457.07",
     "usd_rate_invalid": "Error: USD_TO_VES '{value}' is not a valid number.",
     "standard_deduction_not_set": "Error: STANDARD_DEDUCTION_UT environment variable is not set.",
     "please_set_standard_deduction": "Please set STANDARD_DEDUCTION_UT before running the calculator.",
-    "example_standard_deduction": "Example: export STANDARD_DEDUCTION_UT=775",
+    "example_standard_deduction": "Example: export STANDARD_DEDUCTION_UT=774",
     "standard_deduction_invalid": "Error: STANDARD_DEDUCTION_UT '{value}' is not a valid number.",
     "taxpayer_credit_not_set": "Error: TAXPAYER_CREDIT_UT environment variable is not set.",
     "please_set_taxpayer_credit": "Please set TAXPAYER_CREDIT_UT before running the calculator.",

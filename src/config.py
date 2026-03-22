@@ -25,6 +25,7 @@ class Config:
     standard_deduction_ut: float
     taxpayer_credit_ut: float
     dependent_credit_ut: float
+    installment_days: int
     tax_brackets: list[TaxBracket]
 
 
@@ -124,6 +125,17 @@ def load_config(console: Console) -> Config:
         )
         sys.exit(1)
 
+    # Get INSTALLMENT_DAYS from environment variable (optional, default 20)
+    installment_days = 20
+    installment_days_str = os.getenv("INSTALLMENT_DAYS")
+    if installment_days_str is not None:
+        try:
+            installment_days = int(installment_days_str)
+        except ValueError:
+            console.print(
+                f"[yellow]Warning: INSTALLMENT_DAYS '{installment_days_str}' is not a valid integer. Using default of 20.[/yellow]"
+            )
+
     # Load tax brackets
     tax_brackets = load_tax_brackets_from_csv(console)
 
@@ -133,6 +145,7 @@ def load_config(console: Console) -> Config:
         standard_deduction_ut=standard_deduction_ut,
         taxpayer_credit_ut=taxpayer_credit_ut,
         dependent_credit_ut=dependent_credit_ut,
+        installment_days=installment_days,
         tax_brackets=tax_brackets,
     )
 
@@ -152,7 +165,6 @@ def load_tax_brackets_from_csv(
     """
     brackets = []
     csv_path = Path(__file__).parent.parent / filename
-    print(csv_path)
 
     try:
         with open(csv_path, "r", encoding="utf-8") as file:
