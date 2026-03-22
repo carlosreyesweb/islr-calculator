@@ -59,6 +59,8 @@ class ConsoleUI:
         standard_deduction_ut: float,
         taxpayer_credit_ut: float,
         dependent_credit_ut: float,
+        usd_rate_is_live: bool = False,
+        usd_rate_updated_at: str | None = None,
     ):
         """Display the application header with current config values"""
         title = Text(t("app.title"), style="bold blue")
@@ -68,7 +70,20 @@ class ConsoleUI:
         info_table.add_column("Value", style="bold white")
 
         info_table.add_row(t("header.ut_value"), f"{ut_value} Bs.")
-        info_table.add_row(t("header.usd_rate"), f"{usd_to_ves} Bs.")
+
+        # USD rate row: show source tag and update date if live
+        if usd_rate_is_live:
+            date_hint = f"  ({usd_rate_updated_at[:10]})" if usd_rate_updated_at else ""
+            usd_label = (
+                t("header.usd_rate")
+                + f" [dim]{t('header.usd_rate_live')}{date_hint}[/dim]"
+            )
+        else:
+            usd_label = (
+                t("header.usd_rate") + f" [dim]{t('header.usd_rate_fallback')}[/dim]"
+            )
+        info_table.add_row(usd_label, f"{usd_to_ves} Bs.")
+
         info_table.add_row(
             t("header.standard_deduction"), f"{standard_deduction_ut} UT"
         )

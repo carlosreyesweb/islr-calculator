@@ -5,6 +5,8 @@
   "header": {
     "ut_value": "Valor UT:",
     "usd_rate": "Tasa USD:",
+    "usd_rate_live": "en vivo - BCV",
+    "usd_rate_fallback": "desde .env",
     "standard_deduction": "Desgravamen Unico:",
     "taxpayer_credit": "Rebaja Contribuyente:",
     "dependent_credit": "Rebaja por Dependiente:"
@@ -62,6 +64,7 @@
   "messages": {
     "goodbye": "¡Gracias por usar la Calculadora ISLR!",
     "no_income_specified": "[!] No ingresaste un monto - no hay nada que calcular.",
+    "usd_rate_fetch_failed": "[!] No se pudo obtener la tasa USD en vivo - usando el valor del .env.",
     "credit_header": "by carlosreyesweb  |  contact@carlosreyesweb.com",
     "credit_footer": "Built by carlosreyesweb -- github.com/carlosreyesweb/islr-calculator"
   },

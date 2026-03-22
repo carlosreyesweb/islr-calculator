@@ -43,12 +43,16 @@ Then update the values to match the current fiscal year:
 ```env
 ISLR_LANG=es                  # Language: en or es
 UT_VALUE=43                   # Current Unidad Tributaria value in Bs.
-USD_TO_VES=457.07             # USD/Bs. exchange rate (BCV)
+USD_TO_VES=457.07             # Fallback USD/Bs. rate if the live fetch fails (see below)
 STANDARD_DEDUCTION_UT=774     # Standard deduction in UT (reduces taxable income)
 TAXPAYER_CREDIT_UT=10         # Tax credit for the taxpayer in UT (reduces tax owed)
 DEPENDENT_CREDIT_UT=10        # Tax credit per dependent in UT (reduces tax owed)
 INSTALLMENT_DAYS=20           # Days between installment payments from the March 31 deadline
 ```
+
+### Live USD/Bs. rate
+
+At startup the calculator automatically fetches the official BCV USD/Bs. exchange rate from [ve.dolarapi.com](https://ve.dolarapi.com). The rate and its update date are shown in the header. If the API is unreachable (no internet, timeout, etc.) it falls back silently to the `USD_TO_VES` value in your `.env`.
 
 4. (Optional) Update tax brackets in `tax_brackets.csv` if SENIAT publishes new ones:
 

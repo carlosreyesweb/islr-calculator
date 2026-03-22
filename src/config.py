@@ -4,8 +4,11 @@ Handles loading of environment variables and configuration files
 """
 
 import csv
+import json
 import os
 import sys
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -16,17 +19,44 @@ from src.i18n import t
 from src.models import TaxBracket
 
 
+BCV_API_URL = "https://ve.dolarapi.com/v1/dolares/oficial"
+BCV_API_TIMEOUT = 3  # seconds
+
+
 @dataclass
 class Config:
     """Configuration for the ISLR calculator"""
 
     ut_value: float
     usd_to_ves: float
+    usd_rate_is_live: bool  # True if fetched from BCV API, False if from .env
+    usd_rate_updated_at: str | None  # fechaActualizacion from API, or None if fallback
     standard_deduction_ut: float
     taxpayer_credit_ut: float
     dependent_credit_ut: float
     installment_days: int
     tax_brackets: list[TaxBracket]
+
+
+def fetch_usd_rate() -> tuple[float, str] | None:
+    """
+    Fetch the current official BCV USD/VES rate from ve.dolarapi.com.
+
+    Returns:
+        Tuple of (rate, fechaActualizacion) if successful, None otherwise.
+    """
+    try:
+        req = urllib.request.Request(
+            BCV_API_URL,
+            headers={"User-Agent": "islr-calculator/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=BCV_API_TIMEOUT) as response:
+            data = json.loads(response.read().decode())
+            rate = float(data["promedio"])
+            updated_at = data.get("fechaActualizacion", "")
+            return rate, updated_at
+    except (urllib.error.URLError, KeyError, ValueError, TimeoutError):
+        return None
 
 
 def load_config(console: Console) -> Config:
@@ -49,21 +79,30 @@ def load_config(console: Console) -> Config:
         )
         sys.exit(1)
 
-    # Get USD_TO_VES from environment variable
-    usd_to_ves_str = os.getenv("USD_TO_VES")
-    if usd_to_ves_str is None:
-        console.print(f"[bold red]{t('config_errors.usd_rate_not_set')}[/bold red]")
-        console.print(f"[yellow]{t('config_errors.please_set_usd_rate')}[/yellow]")
-        console.print(f"[dim]{t('config_errors.example_usd_rate')}[/dim]")
-        sys.exit(1)
+    # Try to fetch live USD/VES rate from BCV API
+    usd_rate_is_live = False
+    usd_rate_updated_at = None
+    live_result = fetch_usd_rate()
 
-    try:
-        usd_to_ves = float(usd_to_ves_str)
-    except ValueError:
-        console.print(
-            f"[bold red]{t('config_errors.usd_rate_invalid', value=usd_to_ves_str)}[/bold red]"
-        )
-        sys.exit(1)
+    if live_result is not None:
+        usd_to_ves, usd_rate_updated_at = live_result
+        usd_rate_is_live = True
+    else:
+        # Fall back to USD_TO_VES from .env
+        console.print(f"[yellow]{t('config_errors.usd_rate_fetch_failed')}[/yellow]")
+        usd_to_ves_str = os.getenv("USD_TO_VES")
+        if usd_to_ves_str is None:
+            console.print(f"[bold red]{t('config_errors.usd_rate_not_set')}[/bold red]")
+            console.print(f"[yellow]{t('config_errors.please_set_usd_rate')}[/yellow]")
+            console.print(f"[dim]{t('config_errors.example_usd_rate')}[/dim]")
+            sys.exit(1)
+        try:
+            usd_to_ves = float(usd_to_ves_str)
+        except ValueError:
+            console.print(
+                f"[bold red]{t('config_errors.usd_rate_invalid', value=usd_to_ves_str)}[/bold red]"
+            )
+            sys.exit(1)
 
     # Get STANDARD_DEDUCTION_UT from environment variable
     standard_deduction_ut_str = os.getenv("STANDARD_DEDUCTION_UT")
@@ -142,6 +181,8 @@ def load_config(console: Console) -> Config:
     return Config(
         ut_value=ut_value,
         usd_to_ves=usd_to_ves,
+        usd_rate_is_live=usd_rate_is_live,
+        usd_rate_updated_at=usd_rate_updated_at,
         standard_deduction_ut=standard_deduction_ut,
         taxpayer_credit_ut=taxpayer_credit_ut,
         dependent_credit_ut=dependent_credit_ut,

@@ -101,6 +101,8 @@ def main():
         config.standard_deduction_ut,
         config.taxpayer_credit_ut,
         config.dependent_credit_ut,
+        usd_rate_is_live=config.usd_rate_is_live,
+        usd_rate_updated_at=config.usd_rate_updated_at,
     )
 
     while True:

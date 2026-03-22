@@ -5,6 +5,8 @@
   "header": {
     "ut_value": "UT Value:",
     "usd_rate": "USD Rate:",
+    "usd_rate_live": "live - BCV",
+    "usd_rate_fallback": "from .env",
     "standard_deduction": "Standard Deduction:",
     "taxpayer_credit": "Taxpayer Credit:",
     "dependent_credit": "Dependent Credit:"
@@ -62,6 +64,7 @@
   "messages": {
     "goodbye": "Thank you for using the ISLR Calculator!",
     "no_income_specified": "[!] No income entered - nothing to calculate.",
+    "usd_rate_fetch_failed": "[!] Could not fetch live USD rate - falling back to .env value.",
     "credit_header": "by carlosreyesweb  |  contact@carlosreyesweb.com",
     "credit_footer": "Built by carlosreyesweb -- github.com/carlosreyesweb/islr-calculator"
   },
