@@ -4,14 +4,12 @@ Handles loading of environment variables and configuration files
 """
 
 import csv
-import json
 import os
 import sys
-import urllib.error
-import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
+import requests
 from dotenv import load_dotenv
 from rich.console import Console
 
@@ -46,16 +44,17 @@ def fetch_usd_rate() -> tuple[float, str] | None:
         Tuple of (rate, fechaActualizacion) if successful, None otherwise.
     """
     try:
-        req = urllib.request.Request(
+        response = requests.get(
             BCV_API_URL,
+            timeout=BCV_API_TIMEOUT,
             headers={"User-Agent": "islr-calculator/1.0"},
         )
-        with urllib.request.urlopen(req, timeout=BCV_API_TIMEOUT) as response:
-            data = json.loads(response.read().decode())
-            rate = float(data["promedio"])
-            updated_at = data.get("fechaActualizacion", "")
-            return rate, updated_at
-    except (urllib.error.URLError, KeyError, ValueError, TimeoutError):
+        response.raise_for_status()
+        data = response.json()
+        rate = float(data["promedio"])
+        updated_at = data.get("fechaActualizacion", "")
+        return rate, updated_at
+    except (requests.exceptions.RequestException, KeyError, ValueError):
         return None
 
 
