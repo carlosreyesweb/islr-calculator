@@ -32,9 +32,6 @@
     "add_more_income_rounds": "Do you want to add another income amount for other months?",
     "confirm_zero_income_months": "No income is recorded for: {months}. Confirm these months were 0?",
     "usd_rate_manual_multi_prompt": "No historical rate was found for {months}. Enter USD rate manually (default {fallback_rate}):",
-    "month_has_income": "Did you receive income in {month}?",
-    "month_income_prompt": "How much did you receive in {month}?",
-    "usd_rate_manual_prompt": "No historical rate found for {month}. Enter USD rate manually (default {fallback_rate}):",
     "dependents_prompt": "Do you have any direct dependents (children, parents, etc.)? How many?",
     "declaration_date_prompt": "When do you plan to file? Leave blank to use the deadline (31/03/{year}):"
   },
@@ -116,8 +113,7 @@
     "show_installment_plan": "Would you like to see how to split this into 3 payments?",
     "show_calculation_breakdown": "Would you like to see how this was calculated?",
     "calculate_another_income": "Calculate for another income?",
-    "simulate_another_income": "Run another simulation?",
-    "return_to_main_menu": "Return to main menu?"
+    "simulate_another_income": "Run another simulation?"
   },
   "installments": {
     "title": "Installment Payment Plan",

@@ -90,9 +90,13 @@ def run_calculation(
 
     ui.display_results(result, mode=mode, monthly_income_ves=monthly_income_ves)
 
-    if result.monthly_entries and ui.confirm(
-        t("prompts.show_monthly_breakdown"),
-        default=True,
+    if (
+        mode == CalculatorMode.DECLARATION
+        and result.monthly_entries
+        and ui.confirm(
+            t("prompts.show_monthly_breakdown"),
+            default=True,
+        )
     ):
         ui.display_monthly_breakdown(result.monthly_entries)
 
@@ -162,8 +166,6 @@ def main():
                     break
             elif choice == "3":
                 ui.display_tax_brackets(config.tax_brackets, config.ut_value)
-                if not ui.confirm(t("prompts.return_to_main_menu"), default=True):
-                    break
             elif choice == "4":
                 break
     except KeyboardInterrupt:

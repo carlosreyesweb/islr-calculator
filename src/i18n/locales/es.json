@@ -7,7 +7,7 @@
     "usd_rate": "Tasa USD:",
     "usd_rate_live": "en vivo - BCV",
     "usd_rate_fallback": "desde .env",
-    "standard_deduction": "Desgravamen Unico:",
+    "standard_deduction": "Desgravamen Único:",
     "taxpayer_credit": "Rebaja Contribuyente:",
     "dependent_credit": "Rebaja por Dependiente:"
   },
@@ -32,9 +32,6 @@
     "add_more_income_rounds": "¿Quieres agregar otro monto para otros meses?",
     "confirm_zero_income_months": "No hay ingresos registrados para: {months}. ¿Confirmas que esos meses fueron 0?",
     "usd_rate_manual_multi_prompt": "No se encontró tasa histórica para {months}. Ingresa la tasa USD manualmente (default {fallback_rate}):",
-    "month_has_income": "¿Recibiste ingresos en {month}?",
-    "month_income_prompt": "¿Cuánto recibiste en {month}?",
-    "usd_rate_manual_prompt": "No se encontró tasa histórica para {month}. Ingresa la tasa USD manualmente (default {fallback_rate}):",
     "dependents_prompt": "¿Tienes dependientes directos (hijos, padres, etc.)? ¿Cuántos?",
     "declaration_date_prompt": "¿Cuándo planeas presentar tu declaración? (vacío = 31/03/{year}):"
   },
@@ -116,8 +113,7 @@
     "show_installment_plan": "¿Quieres ver cómo dividir el pago en 3 cuotas?",
     "show_calculation_breakdown": "¿Quieres ver el detalle de cómo se calculó?",
     "calculate_another_income": "¿Calcular para otro ingreso?",
-    "simulate_another_income": "¿Hacer otra simulación?",
-    "return_to_main_menu": "¿Volver al menú principal?"
+    "simulate_another_income": "¿Hacer otra simulación?"
   },
   "installments": {
     "title": "Plan de Pago en Cuotas",
