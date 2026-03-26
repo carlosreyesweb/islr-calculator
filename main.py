@@ -8,7 +8,7 @@ from datetime import date
 from rich.console import Console
 
 from src.calculator import ISLRCalculator
-from src.config import load_config
+from src.config import fetch_historical_month_end_rates, load_config
 from src.console import ConsoleUI
 from src.i18n import t
 from src.models import CalculatorMode, Currency
@@ -32,35 +32,70 @@ def run_calculation(
     Returns:
         True to go back to the menu, False to exit the app.
     """
-    income, currency = ui.get_income(mode=mode)
-    dependents = ui.get_number_of_dependents()
+    fiscal_year: int | None = None
+    monthly_entries = None
+    monthly_income_ves = None
 
-    # Convert to VES
-    income_ves = (
-        calculator.usd_to_ves_convert(income) if currency == Currency.USD else income
-    )
+    if mode == CalculatorMode.DECLARATION:
+        fiscal_year = ui.get_fiscal_year()
+        ui.print(
+            f"[cyan]{t('messages.fetching_historical_rates', year=fiscal_year)}[/cyan]"
+        )
+        historical_rates = fetch_historical_month_end_rates(fiscal_year)
 
-    # Simulation: user entered monthly - annualize
-    if mode == CalculatorMode.SIMULATION:
+        if historical_rates is None:
+            ui.print(
+                f"[yellow]{t('messages.historical_rates_failed', fallback=f'{config.usd_to_ves:,.2f}')}[/yellow]"
+            )
+            historical_rates = {}
+        else:
+            ui.print(
+                f"[green]{t('messages.historical_rates_fetched', months=len(historical_rates), year=fiscal_year)}[/green]"
+            )
+
+        monthly_entries = ui.get_monthly_income_entries(
+            fiscal_year=fiscal_year,
+            monthly_rates=historical_rates,
+            default_usd_rate=config.usd_to_ves,
+        )
+        annual_income_ves = calculator.calculate_annual_income_from_monthly(
+            monthly_entries
+        )
+        currency = Currency.VES
+    else:
+        income, currency = ui.get_income(mode=mode)
+
+        income_ves = (
+            calculator.usd_to_ves_convert(income)
+            if currency == Currency.USD
+            else income
+        )
+
         monthly_income_ves = income_ves
         annual_income_ves = income_ves * 12
-    else:
-        # Declaration: user entered annual directly
-        monthly_income_ves = None
-        annual_income_ves = income_ves
+
+    dependents = ui.get_number_of_dependents()
 
     if annual_income_ves == 0:
         ui.print(f"[yellow]{t('messages.no_income_specified')}[/yellow]")
         return True
 
-    result = calculator.calculate_tax(annual_income_ves, currency, dependents)
+    result = calculator.calculate_tax(
+        annual_income_ves,
+        currency,
+        dependents,
+        fiscal_year=fiscal_year,
+        monthly_entries=monthly_entries,
+    )
 
     ui.display_results(result, mode=mode, monthly_income_ves=monthly_income_ves)
 
     if mode == CalculatorMode.DECLARATION:
         if ui.confirm(t("prompts.show_installment_plan"), default=True):
-            fiscal_year = date.today().year - 1
-            declaration_date = ui.get_declaration_date(fiscal_year)
+            declaration_year = (
+                fiscal_year if fiscal_year is not None else date.today().year - 1
+            )
+            declaration_date = ui.get_declaration_date(declaration_year)
             plan = calculator.get_installment_plan(
                 result, declaration_date, config.installment_days
             )
@@ -105,21 +140,28 @@ def main():
         usd_rate_updated_at=config.usd_rate_updated_at,
     )
 
-    while True:
-        choice = ui.display_menu()
+    try:
+        while True:
+            choice = ui.display_menu()
 
-        if choice == "1":
-            if not run_calculation(ui, calculator, config, CalculatorMode.DECLARATION):
+            if choice == "1":
+                if not run_calculation(
+                    ui, calculator, config, CalculatorMode.DECLARATION
+                ):
+                    break
+            elif choice == "2":
+                if not run_calculation(
+                    ui, calculator, config, CalculatorMode.SIMULATION
+                ):
+                    break
+            elif choice == "3":
+                ui.display_tax_brackets(config.tax_brackets, config.ut_value)
+                if not ui.confirm(t("prompts.return_to_main_menu"), default=True):
+                    break
+            elif choice == "4":
                 break
-        elif choice == "2":
-            if not run_calculation(ui, calculator, config, CalculatorMode.SIMULATION):
-                break
-        elif choice == "3":
-            ui.display_tax_brackets(config.tax_brackets, config.ut_value)
-            if not ui.confirm(t("prompts.return_to_main_menu"), default=True):
-                break
-        elif choice == "4":
-            break
+    except KeyboardInterrupt:
+        pass
 
     ui.show_goodbye_message()
 

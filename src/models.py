@@ -73,6 +73,8 @@ class TaxCalculationResult:
     # Meta
     currency: Currency
     usd_rate: float
+    fiscal_year: int | None
+    monthly_entries: list["MonthlyIncomeEntry"] | None
 
     # Stored intermediates for breakdown
     applicable_bracket: TaxBracket | None
@@ -85,6 +87,17 @@ class CalculationStep:
     step: str
     description: str
     result: str
+
+
+@dataclass
+class MonthlyIncomeEntry:
+    """Income entry for a specific month in the fiscal year"""
+
+    month: int
+    amount: float
+    currency: Currency
+    usd_rate: float | None
+    amount_ves: float
 
 
 @dataclass

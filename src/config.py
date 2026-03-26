@@ -7,6 +7,7 @@ import csv
 import os
 import sys
 from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
 
 import requests
@@ -18,6 +19,7 @@ from src.models import TaxBracket
 
 
 BCV_API_URL = "https://ve.dolarapi.com/v1/dolares/oficial"
+BCV_HISTORICAL_API_URL = "https://ve.dolarapi.com/v1/historicos/dolares/oficial"
 BCV_API_TIMEOUT = 3  # seconds
 
 
@@ -56,6 +58,70 @@ def fetch_usd_rate() -> tuple[float, str] | None:
         return rate, updated_at
     except (requests.exceptions.RequestException, KeyError, ValueError):
         return None
+
+
+def _parse_api_date(raw_value: str) -> date | None:
+    """Parse API date values into date objects."""
+    if not raw_value:
+        return None
+
+    value = raw_value.strip()
+    if not value:
+        return None
+
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(value[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def fetch_historical_month_end_rates(year: int) -> dict[int, tuple[float, str]] | None:
+    """
+    Fetch historical BCV USD rates and keep the latest available date per month.
+
+    Returns:
+        dict[month] = (rate, date_string_yyyy_mm_dd) when request succeeds.
+        None when the API request fails.
+    """
+    try:
+        response = requests.get(
+            BCV_HISTORICAL_API_URL,
+            timeout=BCV_API_TIMEOUT,
+            headers={"User-Agent": "islr-calculator/1.0"},
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException:
+        return None
+
+    latest_by_month: dict[int, tuple[date, float, str]] = {}
+
+    for item in data:
+        raw_date = item.get("fecha", "")
+        parsed_date = _parse_api_date(raw_date)
+        if parsed_date is None or parsed_date.year != year:
+            continue
+
+        try:
+            rate = float(item["promedio"])
+        except (KeyError, TypeError, ValueError):
+            continue
+
+        month = parsed_date.month
+        stored = latest_by_month.get(month)
+        if stored is None or parsed_date > stored[0]:
+            latest_by_month[month] = (parsed_date, rate, parsed_date.isoformat())
+
+    result: dict[int, tuple[float, str]] = {}
+    for month, (_, rate, day_text) in latest_by_month.items():
+        result[month] = (rate, day_text)
+
+    return result
 
 
 def load_config(console: Console) -> Config:

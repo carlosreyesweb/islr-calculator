@@ -10,6 +10,7 @@ from src.models import (
     CalculationStep,
     Currency,
     InstallmentPlan,
+    MonthlyIncomeEntry,
     TaxBracket,
     TaxCalculationResult,
 )
@@ -55,6 +56,8 @@ class ISLRCalculator:
         annual_income_ves: float,
         currency: Currency,
         dependents: int = 0,
+        fiscal_year: int | None = None,
+        monthly_entries: list[MonthlyIncomeEntry] | None = None,
     ) -> TaxCalculationResult:
         """
         Calculate income tax based on Venezuelan ISLR rates.
@@ -138,8 +141,16 @@ class ISLRCalculator:
             effective_rate=effective_rate,
             currency=currency,
             usd_rate=self.usd_to_ves,
+            fiscal_year=fiscal_year,
+            monthly_entries=monthly_entries,
             applicable_bracket=applicable_bracket,
         )
+
+    def calculate_annual_income_from_monthly(
+        self, entries: list[MonthlyIncomeEntry]
+    ) -> float:
+        """Sum all monthly entries converted to VES."""
+        return sum(entry.amount_ves for entry in entries)
 
     def get_calculation_breakdown(
         self, result: TaxCalculationResult

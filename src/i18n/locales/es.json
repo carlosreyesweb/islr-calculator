@@ -24,6 +24,11 @@
     "currency_usd": "Dólares (USD)",
     "income_prompt_declaration": "¿Cuál fue tu ingreso total del año pasado en {currency}?",
     "income_prompt_simulation": "¿Cuánto ganas mensualmente en {currency}?",
+    "fiscal_year_prompt": "¿Qué año fiscal estás declarando?",
+    "monthly_income_header": "Ingresa tus ingresos mes a mes para {year}.",
+    "month_has_income": "¿Recibiste ingresos en {month}?",
+    "month_income_prompt": "¿Cuánto recibiste en {month}?",
+    "usd_rate_manual_prompt": "No se encontró tasa histórica para {month}. Ingresa la tasa USD manualmente (default {fallback_rate}):",
     "dependents_prompt": "¿Tienes dependientes directos (hijos, padres, etc.)? ¿Cuántos?",
     "declaration_date_prompt": "¿Cuándo planeas presentar tu declaración? (vacío = 31/03/{year}):"
   },
@@ -31,6 +36,8 @@
     "negative_dependents": "[x] El número de dependientes no puede ser negativo. Intenta de nuevo.",
     "invalid_number": "[x] Eso no parece un número válido. Intenta de nuevo.",
     "invalid_whole_number": "[x] Por favor ingresa un número entero.",
+    "enter_valid_whole_number": "Por favor ingresa un número entero válido",
+    "invalid_fiscal_year": "[x] Ingresa un año fiscal válido entre 2000 y el año actual.",
     "negative_income": "[x] El ingreso no puede ser negativo. Intenta de nuevo.",
     "enter_valid_number": "Por favor ingresa un número válido",
     "invalid_date": "[x] Fecha inválida. Usa el formato DD/MM/AAAA."
@@ -41,6 +48,7 @@
     "simulation_notice": "[!] Proyección basada en tu ingreso mensual x 12. El impuesto real puede variar.",
     "details_header": "Cómo se calculó",
     "annual_income": "Ingreso anual:",
+    "fiscal_year": "Año fiscal:",
     "marginal_rate": "Tasa impositiva aplicada:",
     "credits_applied": "Rebajas aplicadas:",
     "simulation_monthly_basis": "Basado en ingreso mensual:",
@@ -48,7 +56,13 @@
     "total_tax_usd": "Impuesto a pagar (USD):",
     "effective_rate": "Tasa efectiva:",
     "net_income_ves": "Ingreso neto (Bs.):",
-    "net_income_usd": "Ingreso neto (USD):"
+    "net_income_usd": "Ingreso neto (USD):",
+    "monthly_breakdown_title": "Desglose de Ingresos Mensuales",
+    "month_col": "Mes",
+    "income_col": "Ingreso",
+    "rate_col": "Tasa USD",
+    "income_ves_col": "Ingreso (Bs.)",
+    "not_applicable": "n/a"
   },
   "brackets": {
     "title": "Tramos Impositivos ISLR Venezuela",
@@ -61,10 +75,29 @@
     "title": "Desglose del Cálculo",
     "step": "Paso"
   },
+  "months": {
+    "1": "enero",
+    "2": "febrero",
+    "3": "marzo",
+    "4": "abril",
+    "5": "mayo",
+    "6": "junio",
+    "7": "julio",
+    "8": "agosto",
+    "9": "septiembre",
+    "10": "octubre",
+    "11": "noviembre",
+    "12": "diciembre"
+  },
   "messages": {
     "goodbye": "¡Gracias por usar la Calculadora ISLR!",
     "no_income_specified": "[!] No ingresaste un monto - no hay nada que calcular.",
     "usd_rate_fetch_failed": "[!] No se pudo obtener la tasa USD en vivo - usando el valor del .env.",
+    "fetching_historical_rates": "Buscando tasas BCV históricas para {year}...",
+    "historical_rates_fetched": "Tasas históricas cargadas: {months} meses encontrados para {year}.",
+    "historical_rates_failed": "No se pudieron obtener las tasas históricas. Puedes continuar e ingresar tasas mensuales manualmente. Fallback por defecto: {fallback} Bs/$.",
+    "month_rate_found": "[green]{month}: usando tasa BCV {rate} Bs/$ ({rate_date})[/green]",
+    "month_rate_missing": "{month}: no se encontró tasa BCV de cierre de mes.",
     "credit_header": "by carlosreyesweb  |  contact@carlosreyesweb.com",
     "credit_footer": "Built by carlosreyesweb -- github.com/carlosreyesweb/islr-calculator"
   },

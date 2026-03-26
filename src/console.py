@@ -20,6 +20,7 @@ from src.models import (
     CalculatorMode,
     Currency,
     InstallmentPlan,
+    MonthlyIncomeEntry,
     TaxBracket,
     TaxCalculationResult,
 )
@@ -203,6 +204,162 @@ class ConsoleUI:
             except ValueError:
                 self.console.print(f"[red]{t('errors.invalid_whole_number')}[/red]")
 
+    def get_fiscal_year(self) -> int:
+        """Ask which fiscal year the declaration corresponds to."""
+        default_year = date.today().year - 1
+
+        while True:
+            year_str = questionary.text(
+                t("input.fiscal_year_prompt"),
+                default=str(default_year),
+                validate=lambda text: (
+                    text.strip().isdigit() or t("errors.enter_valid_whole_number")
+                ),
+                style=self.qstyle,
+            ).ask()
+
+            if year_str is None:
+                return default_year
+
+            if not year_str.strip().isdigit():
+                self.console.print(f"[red]{t('errors.invalid_whole_number')}[/red]")
+                continue
+
+            fiscal_year = int(year_str.strip())
+            if fiscal_year < 2000 or fiscal_year > date.today().year:
+                self.console.print(f"[red]{t('errors.invalid_fiscal_year')}[/red]")
+                continue
+
+            return fiscal_year
+
+    def get_monthly_income_entries(
+        self,
+        fiscal_year: int,
+        monthly_rates: dict[int, tuple[float, str]],
+        default_usd_rate: float,
+    ) -> list[MonthlyIncomeEntry]:
+        """Collect one income entry per month for declaration mode."""
+        self.console.print(
+            Panel(
+                t("input.monthly_income_header", year=fiscal_year),
+                border_style="cyan",
+            )
+        )
+
+        entries: list[MonthlyIncomeEntry] = []
+
+        for month in range(1, 13):
+            month_label = t(f"months.{month}")
+
+            rate_info = monthly_rates.get(month)
+            if rate_info:
+                rate, rate_date = rate_info
+                self.console.print(
+                    t(
+                        "messages.month_rate_found",
+                        month=month_label,
+                        rate=f"{rate:,.2f}",
+                        rate_date=rate_date,
+                    )
+                )
+            else:
+                self.console.print(
+                    f"[yellow]{t('messages.month_rate_missing', month=month_label)}[/yellow]"
+                )
+
+            has_income = self.confirm(
+                t("input.month_has_income", month=month_label),
+                default=False,
+            )
+            if not has_income:
+                continue
+
+            month_currency = questionary.select(
+                t("input.currency_prompt"),
+                choices=[
+                    Choice(t("input.currency_ves"), value=Currency.VES),
+                    Choice(t("input.currency_usd"), value=Currency.USD),
+                ],
+                style=self.qstyle,
+            ).ask()
+
+            if not month_currency:
+                raise KeyboardInterrupt
+
+            amount_prompt = t("input.month_income_prompt", month=month_label)
+            while True:
+                try:
+                    amount_str = questionary.text(
+                        amount_prompt,
+                        validate=lambda text: (
+                            text.replace(",", "")
+                            .replace(" ", "")
+                            .replace(".", "", 1)
+                            .replace("-", "", 1)
+                            .isdigit()
+                            or t("errors.enter_valid_number")
+                        ),
+                        style=self.qstyle,
+                    ).ask()
+
+                    if amount_str is None:
+                        raise KeyboardInterrupt
+                    else:
+                        amount = float(amount_str.replace(",", "").replace(" ", ""))
+
+                    if amount < 0:
+                        self.console.print(f"[red]{t('errors.negative_income')}[/red]")
+                        continue
+                    break
+                except ValueError:
+                    self.console.print(f"[red]{t('errors.invalid_number')}[/red]")
+
+            usd_rate: float | None = None
+            amount_ves = amount
+            if month_currency == Currency.USD:
+                if rate_info:
+                    usd_rate = rate_info[0]
+                else:
+                    manual_rate = questionary.text(
+                        t(
+                            "input.usd_rate_manual_prompt",
+                            month=month_label,
+                            fallback_rate=f"{default_usd_rate:,.2f}",
+                        ),
+                        default=f"{default_usd_rate:.2f}",
+                        validate=lambda text: (
+                            text.replace(",", "")
+                            .replace(" ", "")
+                            .replace(".", "", 1)
+                            .isdigit()
+                            or t("errors.enter_valid_number")
+                        ),
+                        style=self.qstyle,
+                    ).ask()
+
+                    try:
+                        usd_rate = float(
+                            (manual_rate or str(default_usd_rate))
+                            .replace(",", "")
+                            .replace(" ", "")
+                        )
+                    except ValueError:
+                        usd_rate = default_usd_rate
+
+                amount_ves = amount * usd_rate
+
+            entries.append(
+                MonthlyIncomeEntry(
+                    month=month,
+                    amount=amount,
+                    currency=month_currency,
+                    usd_rate=usd_rate,
+                    amount_ves=amount_ves,
+                )
+            )
+
+        return entries
+
     def display_tax_brackets(self, tax_brackets: list[TaxBracket], ut_value: float):
         """Display the tax brackets table"""
         table = Table(title=t("brackets.title"), box=box.ROUNDED)
@@ -283,6 +440,9 @@ class ConsoleUI:
         details_table.add_column("Label", style="cyan")
         details_table.add_column("Value", style="white")
 
+        if result.fiscal_year is not None:
+            details_table.add_row(t("results.fiscal_year"), str(result.fiscal_year))
+
         # Annual income (with USD conversion note if applicable)
         if result.currency == Currency.USD:
             details_table.add_row(
@@ -336,6 +496,35 @@ class ConsoleUI:
         )
 
         self.console.print(panel)
+
+        if result.monthly_entries:
+            monthly_table = Table(
+                box=box.ROUNDED, title=t("results.monthly_breakdown_title")
+            )
+            monthly_table.add_column(t("results.month_col"), style="cyan")
+            monthly_table.add_column(t("results.income_col"), justify="right")
+            monthly_table.add_column(t("results.rate_col"), justify="right")
+            monthly_table.add_column(t("results.income_ves_col"), justify="right")
+
+            for entry in result.monthly_entries:
+                amount_label = (
+                    f"${entry.amount:,.2f}"
+                    if entry.currency == Currency.USD
+                    else f"{entry.amount:,.2f} Bs."
+                )
+                rate_label = (
+                    f"{entry.usd_rate:,.2f}"
+                    if entry.usd_rate is not None
+                    else t("results.not_applicable")
+                )
+                monthly_table.add_row(
+                    t(f"months.{entry.month}"),
+                    amount_label,
+                    rate_label,
+                    f"{entry.amount_ves:,.2f} Bs.",
+                )
+
+            self.console.print(monthly_table)
 
     def display_calculation_breakdown(self, steps: list[CalculationStep]):
         """Display the calculation breakdown steps"""
@@ -438,7 +627,9 @@ class ConsoleUI:
     def confirm(self, message: str, default: bool = True) -> bool:
         """Show a Yes/No confirmation prompt"""
         result = questionary.confirm(message, default=default, style=self.qstyle).ask()
-        return result if result is not None else default
+        if result is None:
+            raise KeyboardInterrupt
+        return result
 
     def show_goodbye_message(self):
         """Display goodbye message with developer credit"""
