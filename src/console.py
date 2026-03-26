@@ -238,7 +238,7 @@ class ConsoleUI:
         monthly_rates: dict[int, tuple[float, str]],
         default_usd_rate: float,
     ) -> list[MonthlyIncomeEntry]:
-        """Collect one income entry per month for declaration mode."""
+        """Collect declaration monthly income entries by amount rounds."""
         self.console.print(
             Panel(
                 t("input.monthly_income_header", year=fiscal_year),
@@ -247,33 +247,12 @@ class ConsoleUI:
         )
 
         entries: list[MonthlyIncomeEntry] = []
+        if not self.confirm(t("input.has_any_income_year"), default=True):
+            return entries
 
-        for month in range(1, 13):
-            month_label = t(f"months.{month}")
+        pending_months: set[int] = set(range(1, 13))
 
-            rate_info = monthly_rates.get(month)
-            if rate_info:
-                rate, rate_date = rate_info
-                self.console.print(
-                    t(
-                        "messages.month_rate_found",
-                        month=month_label,
-                        rate=f"{rate:,.2f}",
-                        rate_date=rate_date,
-                    )
-                )
-            else:
-                self.console.print(
-                    f"[yellow]{t('messages.month_rate_missing', month=month_label)}[/yellow]"
-                )
-
-            has_income = self.confirm(
-                t("input.month_has_income", month=month_label),
-                default=False,
-            )
-            if not has_income:
-                continue
-
+        while pending_months:
             month_currency = questionary.select(
                 t("input.currency_prompt"),
                 choices=[
@@ -286,11 +265,10 @@ class ConsoleUI:
             if not month_currency:
                 raise KeyboardInterrupt
 
-            amount_prompt = t("input.month_income_prompt", month=month_label)
             while True:
                 try:
                     amount_str = questionary.text(
-                        amount_prompt,
+                        t("input.income_round_amount_prompt"),
                         validate=lambda text: (
                             text.replace(",", "")
                             .replace(" ", "")
@@ -304,9 +282,8 @@ class ConsoleUI:
 
                     if amount_str is None:
                         raise KeyboardInterrupt
-                    else:
-                        amount = float(amount_str.replace(",", "").replace(" ", ""))
 
+                    amount = float(amount_str.replace(",", "").replace(" ", ""))
                     if amount < 0:
                         self.console.print(f"[red]{t('errors.negative_income')}[/red]")
                         continue
@@ -314,49 +291,125 @@ class ConsoleUI:
                 except ValueError:
                     self.console.print(f"[red]{t('errors.invalid_number')}[/red]")
 
-            usd_rate: float | None = None
-            amount_ves = amount
-            if month_currency == Currency.USD:
-                if rate_info:
-                    usd_rate = rate_info[0]
-                else:
-                    manual_rate = questionary.text(
-                        t(
-                            "input.usd_rate_manual_prompt",
-                            month=month_label,
-                            fallback_rate=f"{default_usd_rate:,.2f}",
-                        ),
-                        default=f"{default_usd_rate:.2f}",
-                        validate=lambda text: (
-                            text.replace(",", "")
-                            .replace(" ", "")
-                            .replace(".", "", 1)
-                            .isdigit()
-                            or t("errors.enter_valid_number")
-                        ),
-                        style=self.qstyle,
-                    ).ask()
+            month_choices = [
+                Choice(title=t(f"months.{month}"), value=month)
+                for month in sorted(pending_months)
+            ]
+            selected_months = questionary.checkbox(
+                t("input.select_months_for_income"),
+                choices=month_choices,
+                validate=lambda selected: (
+                    bool(selected) or t("errors.select_at_least_one_month")
+                ),
+                style=self.qstyle,
+            ).ask()
 
-                    try:
-                        usd_rate = float(
-                            (manual_rate or str(default_usd_rate))
-                            .replace(",", "")
-                            .replace(" ", "")
-                        )
-                    except ValueError:
-                        usd_rate = default_usd_rate
+            if selected_months is None:
+                raise KeyboardInterrupt
 
-                amount_ves = amount * usd_rate
+            missing_rate_months: list[int] = [
+                month
+                for month in selected_months
+                if month_currency == Currency.USD and month not in monthly_rates
+            ]
 
-            entries.append(
-                MonthlyIncomeEntry(
-                    month=month,
-                    amount=amount,
-                    currency=month_currency,
-                    usd_rate=usd_rate,
-                    amount_ves=amount_ves,
+            manual_rate_for_missing: float | None = None
+            if missing_rate_months:
+                missing_labels = ", ".join(
+                    t(f"months.{month}") for month in sorted(missing_rate_months)
                 )
+                manual_rate = questionary.text(
+                    t(
+                        "input.usd_rate_manual_multi_prompt",
+                        months=missing_labels,
+                        fallback_rate=f"{default_usd_rate:,.2f}",
+                    ),
+                    default=f"{default_usd_rate:.2f}",
+                    validate=lambda text: (
+                        text.replace(",", "")
+                        .replace(" ", "")
+                        .replace(".", "", 1)
+                        .isdigit()
+                        or t("errors.enter_valid_number")
+                    ),
+                    style=self.qstyle,
+                ).ask()
+
+                try:
+                    manual_rate_for_missing = float(
+                        (manual_rate or str(default_usd_rate))
+                        .replace(",", "")
+                        .replace(" ", "")
+                    )
+                except ValueError:
+                    manual_rate_for_missing = default_usd_rate
+
+            for month in sorted(selected_months):
+                month_label = t(f"months.{month}")
+                rate_info = monthly_rates.get(month)
+                usd_rate: float | None = None
+                amount_ves = amount
+                round_entry_log = ""
+
+                if month_currency == Currency.USD:
+                    if rate_info:
+                        usd_rate = rate_info[0]
+                        rate_source = t(
+                            "messages.rate_source_bcv",
+                            rate=f"{usd_rate:,.2f}",
+                            rate_date=rate_info[1],
+                        )
+                    else:
+                        usd_rate = manual_rate_for_missing or default_usd_rate
+                        rate_source = (
+                            t("messages.rate_source_manual", rate=f"{usd_rate:,.2f}")
+                            if manual_rate_for_missing is not None
+                            else t(
+                                "messages.rate_source_fallback", rate=f"{usd_rate:,.2f}"
+                            )
+                        )
+
+                    amount_ves = amount * usd_rate
+                    round_entry_log = t(
+                        "messages.round_entry_usd",
+                        month=month_label,
+                        amount=f"{amount:,.2f}",
+                        amount_ves=f"{amount_ves:,.2f}",
+                        rate_info=rate_source,
+                    )
+                else:
+                    round_entry_log = t(
+                        "messages.round_entry_ves",
+                        month=month_label,
+                        amount_ves=f"{amount_ves:,.2f}",
+                    )
+
+                entries.append(
+                    MonthlyIncomeEntry(
+                        month=month,
+                        amount=amount,
+                        currency=month_currency,
+                        usd_rate=usd_rate,
+                        amount_ves=amount_ves,
+                    )
+                )
+                self.console.print(f"[green]- {round_entry_log}[/green]")
+
+            pending_months -= set(selected_months)
+            if not pending_months:
+                break
+
+            if self.confirm(t("input.add_more_income_rounds"), default=True):
+                continue
+
+            pending_labels = ", ".join(
+                t(f"months.{month}") for month in sorted(pending_months)
             )
+            if self.confirm(
+                t("input.confirm_zero_income_months", months=pending_labels),
+                default=False,
+            ):
+                break
 
         return entries
 

@@ -1,17 +1,24 @@
 # Venezuelan Income Tax Calculator (ISLR)
 
-A terminal-based calculator for Venezuelan individual income tax (Impuesto Sobre la Renta - ISLR).
+Terminal app for Venezuelan personal income tax (ISLR), with a guided CLI flow in English or Spanish.
 
 ## Features
 
-- Two modes: **Declaration** (last year's actual income) and **Simulation** (project this year's tax from monthly income)
-- Supports income in Bolivares (Bs.) or US Dollars (USD)
-- Accounts for dependents, standard deduction, and taxpayer credits
-- Shows tax owed, net income, and effective rate
-- Optional 3-installment payment plan with SENIAT-correct due dates
-- Optional step-by-step calculation breakdown in plain language
-- View current tax brackets in UT and Bs.
-- Available in English and Spanish (`ISLR_LANG=en` or `ISLR_LANG=es`)
+- Two calculation modes: `Declaration` (closed fiscal year) and `Simulation` (current-year estimate)
+- Income in `Bs.` or `USD`
+- Automatic BCV USD rate fetch at startup, with `.env` fallback
+- Historical BCV month-end rates for declaration input by month
+- Dependents, standard deduction, and tax credits included
+- Tax owed, net income, and effective tax rate in both `Bs.` and `USD`
+- Optional 3-installment SENIAT-style payment plan
+- Optional step-by-step calculation breakdown
+- Tax bracket table viewer
+- Built-in i18n (`ISLR_LANG=en` / `ISLR_LANG=es`)
+
+## Requirements
+
+- Python `>=3.12`
+- `uv` (recommended) or `pip` + virtualenv
 
 ## Installation
 
@@ -25,36 +32,141 @@ cd islr-calculator
 2. Install dependencies:
 
 ```bash
+# recommended
 uv sync
-# or
+
+# alternative
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-3. Create a `.env` file. Copy `.env.example` as a starting point:
+3. Create `.env` from the example:
 
 ```bash
 cp .env.example .env
 ```
 
-Then update the values to match the current fiscal year:
+## Configuration
+
+Set values in `.env`:
+
+| Variable                | Required | Description                                                           |
+| ----------------------- | -------- | --------------------------------------------------------------------- |
+| `ISLR_LANG`             | No       | UI language (`en` or `es`). Defaults to `en`.                         |
+| `UT_VALUE`              | Yes      | Current Unidad Tributaria value in Bs.                                |
+| `USD_TO_VES`            | Fallback | Fallback USD/Bs. rate used when live BCV fetch is unavailable.        |
+| `STANDARD_DEDUCTION_UT` | Yes      | Standard deduction in UT (reduces taxable income).                    |
+| `TAXPAYER_CREDIT_UT`    | Yes      | Taxpayer credit in UT (reduces tax owed).                             |
+| `DEPENDENT_CREDIT_UT`   | Yes      | Credit per dependent in UT (reduces tax owed).                        |
+| `INSTALLMENT_DAYS`      | No       | Days between installment dates from March 31 baseline (default `20`). |
+
+Example:
 
 ```env
-ISLR_LANG=es                  # Language: en or es
-UT_VALUE=43                   # Current Unidad Tributaria value in Bs.
-USD_TO_VES=457.07             # Fallback USD/Bs. rate if the live fetch fails (see below)
-STANDARD_DEDUCTION_UT=774     # Standard deduction in UT (reduces taxable income)
-TAXPAYER_CREDIT_UT=10         # Tax credit for the taxpayer in UT (reduces tax owed)
-DEPENDENT_CREDIT_UT=10        # Tax credit per dependent in UT (reduces tax owed)
-INSTALLMENT_DAYS=20           # Days between installment payments from the March 31 deadline
+ISLR_LANG=es
+UT_VALUE=43
+USD_TO_VES=457.07
+STANDARD_DEDUCTION_UT=774
+TAXPAYER_CREDIT_UT=10
+DEPENDENT_CREDIT_UT=10
+INSTALLMENT_DAYS=20
 ```
 
-### Live USD/Bs. rate
+### Live USD/Bs. behavior
 
-At startup the calculator automatically fetches the official BCV USD/Bs. exchange rate from [ve.dolarapi.com](https://ve.dolarapi.com). The rate and its update date are shown in the header. If the API is unreachable (no internet, timeout, etc.) it falls back silently to the `USD_TO_VES` value in your `.env`.
+At startup, the app tries to fetch the official BCV USD rate from [ve.dolarapi.com](https://ve.dolarapi.com). If successful, the header shows it as live (with update date). If the request fails, the app falls back to `USD_TO_VES` from `.env`.
 
-4. (Optional) Update tax brackets in `tax_brackets.csv` if SENIAT publishes new ones:
+## Running
+
+```bash
+# recommended
+uv run main.py
+
+# alternative
+python main.py
+```
+
+You can override language inline:
+
+```bash
+ISLR_LANG=es uv run main.py
+```
+
+## Usage
+
+### Main menu
+
+When the app starts, you can choose:
+
+- `[1]` Calculate tax on last year's income (`Declaration`)
+- `[2]` Estimate tax on this year's income (`Simulation`)
+- `[3]` View tax brackets
+- `[4]` Exit
+
+### Declaration mode (detailed)
+
+Use this mode to calculate what you owe for a closed fiscal year.
+
+Flow:
+
+1. Select fiscal year (default is previous year).
+2. App fetches historical BCV month-end rates for that year.
+3. Enter income in rounds (instead of one prompt per month):
+   - choose currency (`Bs.` or `USD`)
+   - enter amount for this round
+   - select the months where that amount applies (multi-select)
+   - repeat if needed for other months/amounts
+4. If some months remain empty, the app asks you to confirm those months were `0`.
+5. Enter number of dependents.
+6. Review results panel.
+7. Optionally show installment plan.
+8. Optionally show calculation breakdown.
+
+For USD rounds:
+
+- If a selected month has historical BCV month-end rate, that month uses it.
+- If not, the app asks for one manual USD rate and applies it to all missing-rate months in that round.
+- Each assigned month is logged with what was saved (amount, conversion, and rate source).
+
+Example round:
+
+```text
+- January: $1,500.00 -> 685,500.00 Bs. (BCV 457.00 - 2024-01-31)
+- February: $1,500.00 -> 690,000.00 Bs. (manual rate 460.00)
+```
+
+### Simulation mode (detailed)
+
+Use this mode to estimate annual tax from current monthly income.
+
+Flow:
+
+1. Choose income currency (`Bs.` or `USD`).
+2. Enter current monthly income.
+3. Enter dependents.
+4. App annualizes income (`monthly * 12`) and calculates estimated tax.
+5. View results panel and optional calculation breakdown.
+
+Note: installment plan is not offered in simulation mode.
+
+### Tax brackets view
+
+Menu option `[3]` displays the full bracket table in UT and Bs. using your current `UT_VALUE`.
+
+## Installment payment plan
+
+Available only in `Declaration` mode.
+
+- 1st installment: filing date (your selected declaration date)
+- 2nd installment: `March 31 + INSTALLMENT_DAYS`
+- 3rd installment: `March 31 + (INSTALLMENT_DAYS * 2)`
+
+With default `INSTALLMENT_DAYS=20`, this is usually April 20 and May 10.
+
+## Tax brackets CSV
+
+Tax brackets are loaded from `tax_brackets.csv`:
 
 ```csv
 min_ut,max_ut,rate,subtract_ut
@@ -70,52 +182,38 @@ min_ut,max_ut,rate,subtract_ut
 
 Column reference:
 
-| Column | Description |
-|---|---|
-| `min_ut` | Lower bound of the bracket in UT |
-| `max_ut` | Upper bound in UT (`inf` for the top bracket) |
-| `rate` | Tax rate as a decimal (e.g. `0.34` for 34%) |
-| `subtract_ut` | Bracket subtraction constant in UT |
+| Column        | Description                                              |
+| ------------- | -------------------------------------------------------- |
+| `min_ut`      | Lower bound in UT (inclusive)                            |
+| `max_ut`      | Upper bound in UT (exclusive). Use `inf` for top bracket |
+| `rate`        | Decimal tax rate (e.g. `0.34` = 34%)                     |
+| `subtract_ut` | Bracket subtraction constant in UT                       |
 
-## Usage
+Formula used at bracket level:
 
-```bash
-uv run main.py
-# or
-python main.py
+```text
+tax_before_credits_ut = (taxable_income_ut * rate) - subtract_ut
 ```
 
-### Declaration mode
+If SENIAT updates brackets, edit this CSV and run the app again.
 
-Use this when you have your **total annual income for last year** and want to know exactly what you owe before filing at SENIAT. The calculator will show:
+## Language support
 
-- Tax owed in Bs. and USD
-- Net income after tax
-- Effective tax rate
-- Optional 3-installment payment plan with exact due dates (filing date, April 20, May 10)
-- Optional step-by-step breakdown
+- English: `ISLR_LANG=en`
+- Spanish: `ISLR_LANG=es`
 
-### Simulation mode
+Language files live in `src/i18n/locales/`.
 
-Use this to **estimate what your tax will be** based on your current monthly income. The calculator annualizes the monthly figure and shows a projected tax. No installment plan is shown since the year is not yet closed.
+## Tech stack
 
-### Installment payment plan
-
-When calculating last year's tax, the calculator can show your payment split into 3 equal installments per SENIAT rules:
-
-- **1st installment:** on your filing date
-- **2nd installment:** 20 days after March 31
-- **3rd installment:** 40 days after March 31
-
-The interval is configurable via `INSTALLMENT_DAYS` in case SENIAT modifies the rules.
-
-## Notes on exchange rate
-
-The `USD_TO_VES` rate should reflect the official BCV (Banco Central de Venezuela) rate at the time of declaration. This affects the USD equivalent figures shown for reference — all tax calculations are done in Bs.
+- `python-dotenv` for `.env` loading
+- `questionary` for interactive prompts
+- `requests` for BCV API calls
+- `rich` for terminal tables/panels
 
 ## Disclaimer
 
-This calculator is for informational purposes only. Tax rates, brackets, and rules may change. Always verify your declaration with SENIAT or a qualified tax professional.
+This calculator is for informational purposes only. Tax rules and values may change. Always validate your declaration with SENIAT or a qualified tax professional.
 
 ## License
 
