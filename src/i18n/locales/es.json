@@ -112,6 +112,7 @@
     "credit_footer": "Built by carlosreyesweb -- github.com/carlosreyesweb/islr-calculator"
   },
   "prompts": {
+    "show_monthly_breakdown": "¿Quieres ver el desglose de ingresos por mes?",
     "show_installment_plan": "¿Quieres ver cómo dividir el pago en 3 cuotas?",
     "show_calculation_breakdown": "¿Quieres ver el detalle de cómo se calculó?",
     "calculate_another_income": "¿Calcular para otro ingreso?",

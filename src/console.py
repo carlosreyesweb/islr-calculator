@@ -550,34 +550,35 @@ class ConsoleUI:
 
         self.console.print(panel)
 
-        if result.monthly_entries:
-            monthly_table = Table(
-                box=box.ROUNDED, title=t("results.monthly_breakdown_title")
+    def display_monthly_breakdown(self, entries: list[MonthlyIncomeEntry]):
+        """Display the monthly income breakdown table."""
+        monthly_table = Table(
+            box=box.ROUNDED, title=t("results.monthly_breakdown_title")
+        )
+        monthly_table.add_column(t("results.month_col"), style="cyan")
+        monthly_table.add_column(t("results.income_col"), justify="right")
+        monthly_table.add_column(t("results.rate_col"), justify="right")
+        monthly_table.add_column(t("results.income_ves_col"), justify="right")
+
+        for entry in entries:
+            amount_label = (
+                f"${entry.amount:,.2f}"
+                if entry.currency == Currency.USD
+                else f"{entry.amount:,.2f} Bs."
             )
-            monthly_table.add_column(t("results.month_col"), style="cyan")
-            monthly_table.add_column(t("results.income_col"), justify="right")
-            monthly_table.add_column(t("results.rate_col"), justify="right")
-            monthly_table.add_column(t("results.income_ves_col"), justify="right")
+            rate_label = (
+                f"{entry.usd_rate:,.2f}"
+                if entry.usd_rate is not None
+                else t("results.not_applicable")
+            )
+            monthly_table.add_row(
+                t(f"months.{entry.month}"),
+                amount_label,
+                rate_label,
+                f"{entry.amount_ves:,.2f} Bs.",
+            )
 
-            for entry in result.monthly_entries:
-                amount_label = (
-                    f"${entry.amount:,.2f}"
-                    if entry.currency == Currency.USD
-                    else f"{entry.amount:,.2f} Bs."
-                )
-                rate_label = (
-                    f"{entry.usd_rate:,.2f}"
-                    if entry.usd_rate is not None
-                    else t("results.not_applicable")
-                )
-                monthly_table.add_row(
-                    t(f"months.{entry.month}"),
-                    amount_label,
-                    rate_label,
-                    f"{entry.amount_ves:,.2f} Bs.",
-                )
-
-            self.console.print(monthly_table)
+        self.console.print(monthly_table)
 
     def display_calculation_breakdown(self, steps: list[CalculationStep]):
         """Display the calculation breakdown steps"""

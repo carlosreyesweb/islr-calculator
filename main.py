@@ -90,6 +90,12 @@ def run_calculation(
 
     ui.display_results(result, mode=mode, monthly_income_ves=monthly_income_ves)
 
+    if result.monthly_entries and ui.confirm(
+        t("prompts.show_monthly_breakdown"),
+        default=True,
+    ):
+        ui.display_monthly_breakdown(result.monthly_entries)
+
     if mode == CalculatorMode.DECLARATION:
         if ui.confirm(t("prompts.show_installment_plan"), default=True):
             declaration_year = (
